@@ -1,0 +1,1607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexus Defenders</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:#030712;color:#e2e8f0;font-family:'Exo 2',sans-serif;font-size:14px}
+.hidden{display:none!important}
+.screen{width:100vw;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:#0a1422}::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:2px}
+.ot{font-family:'Orbitron',sans-serif}
+.ot-sm{font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:2.5px;color:#475569;text-transform:uppercase}
+.btn{background:transparent;border:1px solid currentColor;color:#22d3ee;padding:7px 18px;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;cursor:pointer;transition:background .2s,transform .1s;text-transform:uppercase;border-radius:2px;white-space:nowrap}
+.btn:hover:not(:disabled){background:rgba(255,255,255,.06)}
+.btn:active:not(:disabled){transform:scale(.97)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-lg{padding:11px 30px;font-size:13px;letter-spacing:2px}
+.btn-danger{color:#ef4444}.btn-success{color:#22c55e}.btn-amber{color:#f59e0b}.btn-purple{color:#a855f7}
+#screen-menu{align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 25%, #0c1a35 0%, #030712 68%);position:relative}
+.menu-title{font-family:'Orbitron',sans-serif;font-size:50px;font-weight:900;line-height:1;text-align:center;margin-bottom:10px;background:linear-gradient(135deg,#22d3ee 0%,#a855f7 50%,#f43f5e 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.star{position:absolute;border-radius:50%;background:#fff;pointer-events:none;transition:opacity 1s}
+#hud{height:50px;border-bottom:1px solid #0f1e35;display:flex;align-items:center;padding:0 14px;gap:14px;flex-shrink:0;background:#040b14}
+.hud-stat{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.hud-label{font-family:'Orbitron',sans-serif;font-size:9px;color:#3d5570;letter-spacing:1.5px;text-transform:uppercase}
+.hud-val{font-family:'Orbitron',sans-serif;font-size:14px;font-weight:700}
+#crystal-bar-outer{width:130px}
+#crystal-bar{height:5px;background:#111c2e;border-radius:3px;margin-top:2px}
+#crystal-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
+#game-area{flex:1;display:flex;overflow:hidden;min-height:0}
+#left-panel{width:190px;border-right:1px solid #0f1e35;display:flex;flex-direction:column;overflow:hidden;background:#040b14;flex-shrink:0}
+#canvas-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;gap:8px;min-width:0;overflow:hidden}
+#game-canvas{border:1px solid #111e30;display:block;max-width:100%;max-height:100%}
+#bottom-bar{display:flex;align-items:center;justify-content:center;gap:16px;flex-shrink:0;min-height:40px}
+#hero-tabs{display:flex;flex-wrap:wrap;gap:4px;padding:7px 8px}
+.htab{padding:3px 7px;border:1px solid #111e30;border-radius:2px;cursor:pointer;font-family:'Orbitron',sans-serif;font-size:9px;transition:all .2s;background:transparent}
+.htab.active{background:rgba(255,255,255,.05)}
+#structure-panel{padding:4px}
+.sbtn{padding:9px 8px;border:1px solid #0f1e35;border-radius:3px;cursor:pointer;transition:all .15s;background:#060d1a;margin-bottom:5px;display:flex;align-items:center;gap:7px}
+.sbtn:hover{background:#0a1422}
+.sbtn.active{border-color:currentColor;background:rgba(255,255,255,.04)}
+.sbtn.no-mana{opacity:.4;cursor:not-allowed}
+.stype-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+#placed-wrap{border-top:1px solid #0f1e35;padding:7px 9px;flex-shrink:0;max-height:130px;overflow-y:auto}
+.placed-item{display:flex;align-items:center;gap:5px;padding:3px 0;border-bottom:1px solid #080f1a;font-size:10px}
+.sell-x{margin-left:auto;color:#334155;cursor:pointer;font-size:13px;padding:0 2px;line-height:1}
+.sell-x:hover{color:#ef4444}
+.hero-card{border-radius:3px;padding:13px;cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s;border:1px solid #0f1e35;background:#060d1a;position:relative}
+.hero-card:hover{background:#0a1422}
+.hero-card.sel{background:rgba(255,255,255,.04)}
+.path-tag{font-family:'Orbitron',sans-serif;font-size:9px;padding:2px 6px;border-radius:2px;border:1px solid currentColor;display:inline-block}
+.diff-card{padding:11px 14px;border-radius:3px;cursor:pointer;transition:all .2s;border:1px solid #0f1e35;background:#060d1a;margin-bottom:7px}
+.diff-card.sel{background:rgba(255,255,255,.03)}
+.diff-card:hover{background:#0a1422}
+.info-card{padding:10px 14px;background:#060d1a;border:1px solid #0f1e35;border-radius:3px}
+.stat-row{display:flex;justify-content:space-between;margin-bottom:3px;font-size:11px}
+.stat-bar-bg{background:#0d1b2e;height:3px;border-radius:2px;margin-top:1px}
+.stat-bar-fill{height:100%;border-radius:2px}
+#modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:100}
+.item-card{padding:13px 10px;border-radius:4px;width:140px;border:1px solid transparent;transition:all .45s cubic-bezier(.34,1.56,.64,1);transform:scale(.4) translateY(20px);opacity:0}
+.item-card.show{transform:scale(1) translateY(0);opacity:1}
+.result-screen{align-items:center;justify-content:center;flex-direction:column;gap:18px;background:#030712}
+.result-big{font-family:'Orbitron',sans-serif;font-size:40px;font-weight:900;text-align:center}
+.wave-status-bar{width:100%;height:3px;background:#0d1b2e;margin-top:8px;border-radius:2px;overflow:hidden}
+.wave-fill{height:100%;background:linear-gradient(90deg,#22d3ee,#a855f7);border-radius:2px;transition:width .6s}
+#node-tree-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:200}
+.node-path{padding:14px;border:1px solid #0f1e35;border-radius:4px;margin-bottom:10px;cursor:pointer;transition:all .2s}
+.node-path:hover{background:rgba(255,255,255,.03)}
+.node-path.active-path{border-color:currentColor}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+@keyframes popIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+#toast-root{position:fixed;right:16px;bottom:70px;display:flex;flex-direction:column-reverse;gap:6px;z-index:500;pointer-events:none}
+.toast-item{padding:6px 13px;border-radius:3px;font-family:'Orbitron',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;background:#070e1b;border:1px solid currentColor;white-space:nowrap;animation:toastIn .2s ease,toastOut .4s ease 2.4s forwards}
+@keyframes toastIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateX(16px)}}
+.bond-chip{font-family:'Orbitron',sans-serif;font-size:8px;padding:2px 6px;border-radius:2px;border:1px solid currentColor;letter-spacing:.5px;white-space:nowrap}
+.upg-pip{display:inline-block;width:6px;height:6px;border-radius:1px;border:1px solid #1a3050;margin-right:1px;vertical-align:middle}
+.upg-pip.lit{background:#f59e0b;border-color:#c47d00}
+.upg-btn{background:transparent;border:1px solid #f59e0b;color:#f59e0b;font-family:'Orbitron',sans-serif;font-size:8px;padding:1px 5px;border-radius:2px;cursor:pointer;margin-left:auto;white-space:nowrap}
+.upg-btn:hover{background:#f59e0b22}
+.upg-btn:disabled{opacity:.3;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- ══ MENU ══ -->
+<div id="screen-menu" class="screen">
+  <div id="star-field"></div>
+  <div style="position:relative;text-align:center;z-index:1">
+    <div class="ot-sm" style="margin-bottom:16px;letter-spacing:8px;color:#334155">THE BREACH — YEAR 2387</div>
+    <div class="menu-title">NEXUS<br>DEFENDERS</div>
+    <div style="color:#3d5570;font-size:13px;margin-bottom:44px;letter-spacing:2px">PROTECT THE CORE. REPEL THE INVASION.</div>
+    <button class="btn btn-lg" style="color:#22d3ee;padding:13px 44px;font-size:14px" onclick="G.goto('heroes')">⚡ DEPLOY DEFENDERS</button>
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:center">
+      <button class="btn" style="color:#f59e0b;font-size:10px;padding:5px 14px" onclick="G.save()">💾 SAVE</button>
+      <button class="btn" id="load-btn" style="color:#60a5fa;font-size:10px;padding:5px 14px" onclick="G.load()">📂 LOAD</button>
+    </div>
+    <div style="margin-top:10px;color:#1e3555;font-family:'Orbitron',sans-serif;font-size:9px;letter-spacing:2px">6 HEROES · 5 DIFFICULTIES · TRIAD SYSTEM · ITEM DROPS</div>
+  </div>
+</div>
+
+<!-- ══ HERO SELECT ══ -->
+<div id="screen-heroes" class="screen hidden" style="background:#030712">
+  <div style="padding:15px 22px;border-bottom:1px solid #0f1e35;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div><div class="ot-sm" style="margin-bottom:3px">STEP 1 OF 2</div><div class="ot" style="font-size:17px;font-weight:700">SELECT DEFENDERS</div></div>
+    <div style="text-align:right"><span class="ot" id="sel-count" style="font-size:20px;color:#22d3ee">0</span><span style="color:#2a3d55;font-size:13px"> / 6</span><div style="font-size:10px;color:#3d5570;margin-top:1px">Solo play fully viable · Multi unlocks Resonance Bonds</div></div>
+  </div>
+  <div style="flex:1;display:flex;overflow:hidden;min-height:0">
+    <div id="hero-grid" style="flex:1;padding:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:start;overflow-y:auto"></div>
+    <div id="hero-detail" style="width:265px;border-left:1px solid #0f1e35;padding:18px;overflow-y:auto;background:#040b14"></div>
+  </div>
+  <div style="padding:13px 22px;border-top:1px solid #0f1e35;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <button class="btn" onclick="G.goto('menu')">← BACK</button>
+    <button class="btn" id="heroes-next" disabled onclick="G.goto('map')" style="color:#22d3ee">CONTINUE →</button>
+  </div>
+</div>
+
+<!-- ══ MAP SELECT ══ -->
+<div id="screen-map" class="screen hidden" style="background:#030712">
+  <div style="padding:15px 22px;border-bottom:1px solid #0f1e35;flex-shrink:0">
+    <div class="ot-sm" style="margin-bottom:3px">STEP 2 OF 2</div>
+    <div class="ot" style="font-size:17px;font-weight:700">MISSION BRIEFING</div>
+  </div>
+  <div style="flex:1;display:flex;padding:22px;gap:18px;overflow:hidden;min-height:0">
+    <div style="width:230px;flex-shrink:0">
+      <div class="ot-sm" style="margin-bottom:12px">DIFFICULTY</div>
+      <div id="diff-list"></div>
+    </div>
+    <div style="flex:1;overflow-y:auto">
+      <div class="ot-sm" style="margin-bottom:12px">THE SHATTERED CORRIDOR</div>
+      <div id="map-mini" style="background:#050c17;border:1px solid #0f1e35;border-radius:3px;padding:12px;display:inline-block;margin-bottom:14px"></div>
+      <div id="map-stats" style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px"></div>
+      <div id="diff-details" style="padding:10px 12px;background:#040a14;border:1px solid #0f1e35;border-radius:3px;font-size:11px;color:#475569;line-height:1.7"></div>
+    </div>
+    <div style="width:180px;flex-shrink:0">
+      <div class="ot-sm" style="margin-bottom:12px">YOUR SQUAD</div>
+      <div id="squad-list"></div>
+    </div>
+  </div>
+  <div style="padding:13px 22px;border-top:1px solid #0f1e35;display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+    <button class="btn" onclick="G.goto('heroes')">← BACK</button>
+    <button class="btn btn-lg" id="deploy-btn" onclick="G.startGame()" style="color:#60a5fa">DEPLOY ⚡</button>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div id="screen-game" class="screen hidden">
+  <div id="hud">
+    <div class="ot" style="font-size:11px;font-weight:700;color:#22d3ee;margin-right:4px">NEXUS</div>
+    <div class="hud-stat">
+      <span style="font-size:15px;flex-shrink:0">⚡</span>
+      <div id="crystal-bar-outer">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span class="hud-label">CORE</span>
+          <span class="ot" id="crystal-txt" style="font-size:9px;color:#22c55e">1000</span>
+        </div>
+        <div id="crystal-bar"><div id="crystal-fill" style="width:100%;background:#22c55e"></div></div>
+      </div>
+    </div>
+    <div style="flex:1"></div>
+    <div class="hud-stat"><span class="hud-label" style="color:#60a5fa">MANA</span><span class="hud-val" id="hud-mana" style="color:#60a5fa">0</span></div>
+    <div class="hud-stat"><span class="hud-label" style="color:#f59e0b">GOLD</span><span class="hud-val" id="hud-gold" style="color:#f59e0b">0</span></div>
+    <div class="hud-stat"><span class="hud-label" style="color:#ef4444">KILLS</span><span class="hud-val" id="hud-kills" style="color:#ef4444">0</span></div>
+    <div class="hud-stat"><span class="hud-label">WAVE</span><span class="hud-val" id="hud-wave">1/10</span></div>
+    <div class="ot" id="phase-badge" style="font-size:10px;padding:3px 9px;border:1px solid #22c55e;color:#22c55e;border-radius:2px;flex-shrink:0">BUILD</div>
+    <div class="ot" id="hud-diff" style="font-size:9px;color:#334155;flex-shrink:0"></div>
+    <div id="hud-bonds" style="display:flex;gap:4px;align-items:center;flex-shrink:0;flex-wrap:wrap"></div>
+  </div>
+  <div id="game-area">
+    <div id="left-panel">
+      <div style="padding:7px 9px;border-bottom:1px solid #0f1e35;flex-shrink:0">
+        <div class="ot-sm" style="margin-bottom:5px">ACTIVE HERO</div>
+        <div id="hero-tabs"></div>
+      </div>
+      <div id="structure-panel" style="padding:4px;overflow-y:auto;flex:1"></div>
+      <div id="placed-wrap">
+        <div class="ot-sm" style="margin-bottom:5px">PLACED (<span id="placed-count">0</span>)</div>
+        <div id="placed-list"></div>
+        <div style="font-size:9px;color:#1e3555;margin-top:4px">Click ✕ to sell for 50% mana</div>
+      </div>
+    </div>
+    <div id="canvas-wrap">
+      <canvas id="game-canvas"></canvas>
+      <div id="bottom-bar">
+        <button class="btn btn-danger" id="start-wave-btn" onclick="G.startCombat()">⚔ START WAVE</button>
+        <div class="ot hidden" id="combat-msg" style="font-size:11px;color:#ef4444;animation:blink 1s step-end infinite">⚔ WAVE IN PROGRESS...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPLETE ══ -->
+<div id="screen-complete" class="screen hidden result-screen">
+  <div class="ot-sm" style="letter-spacing:6px">MISSION COMPLETE</div>
+  <div class="result-big" style="color:#22c55e">BREACH REPELLED</div>
+  <div style="color:#3d5570">All 10 waves survived. Nexus Core intact.</div>
+  <div style="text-align:center">
+    <div class="ot-sm" style="margin-bottom:14px">COMPLETION REWARDS</div>
+    <div id="complete-drops" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;max-width:700px"></div>
+  </div>
+  <div style="display:flex;gap:12px">
+    <button class="btn btn-success btn-lg" onclick="G.goto('menu')">MAIN MENU</button>
+    <button class="btn btn-lg" style="color:#22d3ee" onclick="G.goto('heroes')">PLAY AGAIN</button>
+  </div>
+</div>
+
+<!-- ══ GAME OVER ══ -->
+<div id="screen-gameover" class="screen hidden result-screen">
+  <div class="ot-sm" style="letter-spacing:6px">NEXUS CORE DESTROYED</div>
+  <div class="result-big" style="color:#ef4444">BREACH WINS</div>
+  <div style="color:#3d5570">The Nexus Core has been shattered. The breach expands.</div>
+  <div style="display:flex;gap:12px">
+    <button class="btn btn-danger btn-lg" onclick="G.goto('heroes')">RETRY</button>
+    <button class="btn btn-lg" onclick="G.goto('menu')">MAIN MENU</button>
+  </div>
+</div>
+
+<!-- ══ DROPS MODAL ══ -->
+<div id="modal-backdrop" class="hidden">
+  <div style="background:#070e1b;border:1px solid #1a3050;border-radius:5px;padding:26px 28px;min-width:370px;max-width:620px;text-align:center;animation:popIn .3s ease">
+    <div class="ot-sm" id="drop-wave-label" style="margin-bottom:7px">WAVE COMPLETE</div>
+    <div class="ot" id="drop-title" style="font-size:21px;font-weight:700;margin-bottom:20px;color:#e2e8f0">ITEMS DROPPED</div>
+    <div id="drop-items" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:22px;min-height:40px"></div>
+    <button class="btn btn-success" id="drop-continue-btn">CONTINUE →</button>
+  </div>
+</div>
+
+<!-- ══ TOAST ROOT ══ -->
+<div id="toast-root"></div>
+
+<!-- ══ NODE TREE MODAL ══ -->
+<div id="node-tree-modal" class="hidden">
+  <div style="background:#070e1b;border:1px solid #1a3050;border-radius:5px;padding:24px;width:480px;max-height:80vh;overflow-y:auto;animation:popIn .3s ease">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div class="ot" style="font-size:16px;font-weight:700" id="nt-hero-name">NODE TREE</div>
+      <button class="btn" style="color:#475569;padding:4px 10px;font-size:10px" onclick="G.closeNodeTree()">✕ CLOSE</button>
+    </div>
+    <div style="margin-bottom:16px">
+      <div class="ot-sm" style="margin-bottom:10px">STAT POINTS AVAILABLE: <span id="nt-points" style="color:#22d3ee">0</span></div>
+      <div id="nt-stats-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px"></div>
+    </div>
+    <div class="ot-sm" style="margin-bottom:10px">PLAYSTYLE PATHS</div>
+    <div id="nt-paths"></div>
+    <div class="ot-sm" style="margin-bottom:8px;margin-top:14px">MASTERY LEVEL</div>
+    <div id="nt-mastery" style="padding:10px;background:#050c17;border:1px solid #0f1e35;border-radius:3px;font-size:12px"></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════
+
+const CELL=42, COLS=14, ROWS=9, CW=COLS*CELL, CH=ROWS*CELL, DT=0.05;
+
+const PATH=[[0,4],[1,4],[2,4],[3,4],[3,3],[3,2],[3,1],[4,1],[5,1],[6,1],
+  [7,1],[7,2],[7,3],[7,4],[7,5],[7,6],[8,6],[9,6],[10,6],[11,6],
+  [11,5],[11,4],[11,3],[11,2],[12,2],[13,2]];
+const PSET=new Set(PATH.map(([c,r])=>`${c},${r}`));
+
+const RC={Common:'#9ca3af',Uncommon:'#4ade80',Rare:'#60a5fa',Epic:'#c084fc',Legendary:'#fb923c',Mythic:'#f43f5e'};
+const RG={Common:'none',Uncommon:'0 0 8px #4ade8066',Rare:'0 0 10px #60a5fa66',Epic:'0 0 12px #c084fc66',Legendary:'0 0 16px #fb923c88',Mythic:'0 0 20px #f43f5eaa'};
+const RORD=['Common','Uncommon','Rare','Epic','Legendary','Mythic'];
+
+const HEROES={
+  AXIOM:{id:'AXIOM',name:'AXIOM',title:'Combat Android',icon:'🤖',color:'#22d3ee',
+    origin:'Future Tech',lore:'A decommissioned military android reactivated by The Breach. Cold precision, unstoppable force.',
+    stats:{Power:8,Resilience:6,Mana:7,Range:7,Haste:9,Fortune:3},
+    paths:['Overcharge','Fortress','Network'],pc:['#ef4444','#3b82f6','#f59e0b'],
+    pathDesc:['Glass cannon — more damage, less HP','Tanky grids — structures absorb punishment','Grid synergy — anchors boost everything nearby'],
+    A:{name:'Power Node',emoji:'⚡',cost:80,desc:'Nearby Strikers attack 40% faster'},
+    C:{name:'Targeting Beacon',emoji:'🎯',cost:40,desc:'Marks enemies — +50% damage taken from Strikers'},
+    S:{name:'Plasma Cannon',emoji:'🔫',cost:60,desc:'High single-target dmg, 3× vs marked enemies',dmg:35,range:3.2,rate:1.2}},
+  LYRA:{id:'LYRA',name:'LYRA',title:'Void Witch',icon:'🔮',color:'#a855f7',
+    origin:'Void Magic',lore:'A dimensional exile who bends space itself. The void between realities bends to her will.',
+    stats:{Power:9,Resilience:4,Mana:10,Range:8,Haste:6,Fortune:5},
+    paths:['Collapse','Weave','Resonance'],pc:['#8b5cf6','#ec4899','#06b6d4'],
+    pathDesc:['Maximum AoE — gravity pulls enemies together','Mana efficiency — stretch every resource further','Cross-hero amplification — empowers allies'],
+    A:{name:'Mana Bloom',emoji:'🌸',cost:90,desc:'Nearby structures cost 25% less mana to place'},
+    C:{name:'Gravity Well',emoji:'🌀',cost:45,desc:'Pulls and slows enemies, groups them for AoE'},
+    S:{name:'Arcane Pylon',emoji:'⚗️',cost:65,desc:'AoE magic damage, 2× to slowed enemies',dmg:25,range:2.5,rate:0.8}},
+  GRAK:{id:'GRAK',name:'GRAK',title:'Stone Age Berserker',icon:'🦴',color:'#f97316',
+    origin:'Prehistoric Primal',lore:'Dragged through The Breach from 40,000 BC. He has never stopped fighting. He never will.',
+    stats:{Power:10,Resilience:10,Mana:5,Range:4,Haste:4,Fortune:4},
+    paths:['Berserker','Fortress','Totem'],pc:['#ef4444','#78716c','#84cc16'],
+    pathDesc:['Pure aggression — destroy everything fast','Walls of bone — slows and blocks the path','Spirit totems — sustained poison devastation'],
+    A:{name:'Tremor Field',emoji:'🗿',cost:70,desc:'Slows all enemies in zone by 35%'},
+    C:{name:'Venom Pit',emoji:'🐊',cost:35,desc:'Poisons enemies for 8 damage per second'},
+    S:{name:'Bone Totem',emoji:'💀',cost:55,desc:'AoE ground slam, 2× damage to poisoned enemies',dmg:30,range:2.2,rate:0.7}},
+  NOVA:{id:'NOVA',name:'NOVA',title:'Quantum Physicist',icon:'⚛️',color:'#a3e635',
+    origin:'Experimental Tech',lore:'She accidentally tore The Breach open during a quantum experiment. Now she weaponizes her mistake.',
+    stats:{Power:7,Resilience:5,Mana:8,Range:9,Haste:7,Fortune:8},
+    paths:['Paradox','Collapse','Probability'],pc:['#84cc16','#06b6d4','#f59e0b'],
+    pathDesc:['Timeline chaos — loop enemies backward','Dimensional collapse — concentrate enemy density','Fortune maximizer — loot and probability stacking'],
+    A:{name:'Quantum Bubble',emoji:'🫧',cost:85,desc:'20% chance enemies randomly skip their movement'},
+    C:{name:'Time Fracture',emoji:'⏰',cost:50,desc:'Slows enemies 50%, Strikers deal 2× inside zone'},
+    S:{name:'Wormhole',emoji:'🕳️',cost:70,desc:'Teleports enemies 25% back on path + deals damage',dmg:20,range:3.5,rate:0.6}},
+  ZARA:{id:'ZARA',name:'ZARA',title:'Primal Shaman',icon:'🐍',color:'#34d399',
+    origin:'Prehistoric Spirit',lore:'A shaman whose bond with ancient spirits only grew stronger when The Breach tore time open.',
+    stats:{Power:6,Resilience:7,Mana:8,Range:7,Haste:5,Fortune:9},
+    paths:['Pack Leader','Venom','Spirit'],pc:['#10b981','#84cc16','#06b6d4'],
+    pathDesc:['Wolf packs — coordinated summon attacks','Venom stacking — dissolve enemies over time','Spirit communion — passive battlefield buffs'],
+    A:{name:'Spirit Mist',emoji:'🌿',cost:75,desc:'Reduces enemy armor by 40% in zone'},
+    C:{name:'Venom Field',emoji:'🧪',cost:40,desc:'Stacking poison, 5 dmg/sec per stack (up to 5)'},
+    S:{name:'Spirit Wolf',emoji:'🐺',cost:65,desc:'Summons a wolf that attacks nearby enemies, bonus vs poisoned',dmg:22,range:2.5,rate:1.0}},
+  ECLIPSE:{id:'ECLIPSE',name:'ECLIPSE',title:'Shadow Mage',icon:'🌑',color:'#f43f5e',
+    origin:'Void Shadow Magic',lore:'Born in the exact shadow of The Breach itself. Eclipse commands the darkness between dimensions.',
+    stats:{Power:9,Resilience:5,Mana:7,Range:8,Haste:8,Fortune:6},
+    paths:['Umbral','Void','Recursion'],pc:['#e11d48','#7c3aed','#475569'],
+    pathDesc:['Shadow clone ambush — multiply your Strikers','Void unraveling — strip enemy defenses completely','Recursive darkness — exponential stacking debuffs'],
+    A:{name:'Null Zone',emoji:'⬛',cost:80,desc:'Disables enemy abilities, +20% damage from all sources'},
+    C:{name:'Shadow Veil',emoji:'👁️',cost:45,desc:'Marks enemies for instant execution below 25% HP'},
+    S:{name:'Shadow Spike',emoji:'🗡️',cost:60,desc:'High damage, executes marked enemies at <25% HP',dmg:40,range:3.0,rate:1.0}},
+};
+
+const DIFF={
+  easy:       {label:'Easy',       col:'#4ade80',hm:0.6,sm:0.7,cm:0.7,mana:320,mw:90,gw:60, guar:'Common',   br:0,   mm:0.8},
+  normal:     {label:'Normal',     col:'#60a5fa',hm:1.0,sm:1.0,cm:1.0,mana:270,mw:75,gw:80, guar:'Uncommon', br:.25, mm:1.2},
+  hard:       {label:'Hard',       col:'#facc15',hm:1.5,sm:1.2,cm:1.3,mana:230,mw:60,gw:100,guar:'Rare',     br:.50, mm:1.8},
+  chaos:      {label:'Chaos',      col:'#fb923c',hm:2.5,sm:1.5,cm:1.8,mana:190,mw:50,gw:130,guar:'Epic',     br:.75, mm:2.8},
+  apocalypse: {label:'Apocalypse', col:'#f43f5e',hm:4.0,sm:2.0,cm:2.5,mana:160,mw:40,gw:180,guar:'Legendary',br:1.0,mm:5.0},
+};
+
+const ET=[
+  {id:'scout',  name:'Breach Scout', emoji:'👾',bHp:80,  spd:1.4,dmg:8,  gold:8,  xp:10,elite:false,boss:false},
+  {id:'warrior',name:'Void Warrior', emoji:'👹',bHp:200, spd:1.0,dmg:15, gold:15, xp:20,elite:false,boss:false},
+  {id:'swarm',  name:'Nano Swarm',   emoji:'🦟',bHp:40,  spd:2.2,dmg:4,  gold:5,  xp:8, elite:false,boss:false},
+  {id:'brute',  name:'Rift Brute',   emoji:'🐉',bHp:500, spd:0.6,dmg:30, gold:30, xp:40,elite:false,boss:false},
+  {id:'elite',  name:'Breach Elite', emoji:'💀',bHp:400, spd:1.3,dmg:25, gold:50, xp:60,elite:true, boss:false},
+  {id:'boss',   name:'BREACH TITAN', emoji:'🔥',bHp:2000,spd:0.4,dmg:100,gold:200,xp:300,elite:false,boss:true},
+];
+
+const ITEMS=[
+  {id:'c1',name:'Cracked Power Cell',  rar:'Common',   slot:'Weapon',hero:null,     desc:'+5% Striker damage'},
+  {id:'c2',name:'Worn Plating',        rar:'Common',   slot:'Armor', hero:null,     desc:'+8% Structure HP'},
+  {id:'c3',name:'Frayed Conduit Wire', rar:'Common',   slot:'Relic', hero:null,     desc:'Conduits cost 5% less mana'},
+  {id:'c4',name:'Loose Wiring',        rar:'Common',   slot:'Sigil', hero:null,     desc:'+3% Anchor pulse frequency'},
+  {id:'u1',name:'Charged Capacitor',   rar:'Uncommon', slot:'Weapon',hero:null,     desc:'Every 3 hits: next attack deals +20% damage'},
+  {id:'u2',name:'Resonant Casing',     rar:'Uncommon', slot:'Relic', hero:null,     desc:'Anchor range +15% per nearby allied structure'},
+  {id:'u3',name:'Hardened Shell',      rar:'Uncommon', slot:'Armor', hero:null,     desc:'Structures below 30% HP take 20% less damage'},
+  {id:'u4',name:'Mana Weave',          rar:'Uncommon', slot:'Sigil', hero:null,     desc:'Conduits cost 10% less per Conduit on field'},
+  {id:'r1',name:'Feedback Loop',       rar:'Rare',     slot:'Weapon',hero:null,     desc:'Striker kills reduce Anchor cooldown by 0.5s'},
+  {id:'r2',name:'Overextended Grid',   rar:'Rare',     slot:'Relic', hero:null,     desc:'Anchor zones stack their bonuses instead of cancelling'},
+  {id:'r3',name:'Brittle Foundations', rar:'Rare',     slot:'Armor', hero:null,     desc:'-20% Structure HP but Strikers deal +35% damage'},
+  {id:'r4',name:"Fortune's Edge",      rar:'Rare',     slot:'Sigil', hero:null,     desc:'Each equipped item grants +3% Fortune stat'},
+  {id:'e1',name:'Cascade Protocol',    rar:'Epic',     slot:'Weapon',hero:null,     desc:'Striker kills trigger one bonus instant shot at nearest enemy'},
+  {id:'e2',name:'Living Anchor',       rar:'Epic',     slot:'Relic', hero:null,     desc:'Anchors passively regenerate HP of all nearby structures'},
+  {id:'e3',name:'Deep Conduit',        rar:'Epic',     slot:'Sigil', hero:null,     desc:'Conduit debuffs apply double stacks on repeat enemy pass'},
+  {id:'l1',name:'Overclock Chip',      rar:'Legendary',slot:'Relic', hero:'AXIOM',  desc:'Overclock Protocol triggers every wave, duration scales with Power'},
+  {id:'l2',name:'Gravity Codex',       rar:'Legendary',slot:'Relic', hero:'LYRA',   desc:'Gravity Wells hold enemies in place 1.5s, scales with Mana stat'},
+  {id:'l3',name:'Primal Resonance',    rar:'Legendary',slot:'Relic', hero:'GRAK',   desc:'Rooted enemies crack the ground — permanently slows the area'},
+  {id:'l4',name:'Fractured Timeline',  rar:'Legendary',slot:'Relic', hero:'NOVA',   desc:'Time-slow zones reset enemy HP to entry value when they exit'},
+  {id:'l5',name:'Alpha Pack',          rar:'Legendary',slot:'Relic', hero:'ZARA',   desc:'Spirit Wolves gain bonus HP from Resilience and respawn once per wave'},
+  {id:'l6',name:'Umbral Recursion',    rar:'Legendary',slot:'Relic', hero:'ECLIPSE',desc:'Destroyed Shadow Clones leave behind a persistent Null Zone'},
+  {id:'m1',name:'The Overcurrent',     rar:'Mythic',   slot:'Sigil', hero:'AXIOM',  desc:'AXIOM\'s Overcharge and Network paths both activate simultaneously'},
+  {id:'m2',name:'Void Absolute',       rar:'Mythic',   slot:'Sigil', hero:'LYRA',   desc:'All of Lyra\'s structure types share the same upgrade level'},
+  {id:'m3',name:'Eternal Totem',       rar:'Mythic',   slot:'Sigil', hero:'GRAK',   desc:'Fortress path Anchors cannot be destroyed — only temporarily disabled'},
+  {id:'m4',name:'The Living Formula',  rar:'Mythic',   slot:'Sigil', hero:'NOVA',   desc:'Each stat point invested passively boosts ALL other stats by 0.5%'},
+  {id:'m5',name:'Serpent Ascendant',   rar:'Mythic',   slot:'Sigil', hero:'ZARA',   desc:'Venom stacks have no cap — all excess converts to burst damage on death'},
+  {id:'m6',name:'Null Genesis',        rar:'Mythic',   slot:'Sigil', hero:'ECLIPSE',desc:'Shadow Clones mirror your full Striker layout at 60% power'},
+];
+
+const SHP={A:420,C:200,S:310,S2:500};
+const STAT_COLORS={Power:'#ef4444',Resilience:'#3b82f6',Mana:'#60a5fa',Range:'#a855f7',Haste:'#f59e0b',Fortune:'#34d399'};
+
+// Tier-2 Strikers (unlocked at hero level 15)
+HEROES.AXIOM.S2   ={name:'Ion Cannon',    emoji:'💥',cost:110,desc:'AoE burst, 4× vs marked enemies',      dmg:55,range:3.4,rate:0.65,tier:2};
+HEROES.LYRA.S2    ={name:'Arcane Vortex', emoji:'🌪️',cost:120,desc:'Persistent AoE zone, 3× to slowed',    dmg:28,range:3.0,rate:0.55,tier:2};
+HEROES.GRAK.S2    ={name:'Mega Totem',    emoji:'☠️',cost:110,desc:'Massive AoE + stun, 3× to poisoned',   dmg:52,range:2.8,rate:0.50,tier:2};
+HEROES.NOVA.S2    ={name:'Quantum Rift',  emoji:'🌌',cost:115,desc:'Large pushback + 3× inside fractures', dmg:32,range:3.6,rate:0.50,tier:2};
+HEROES.ZARA.S2    ={name:'Alpha Wolf',    emoji:'🐺',cost:115,desc:'3× vs poisoned, spawns 2 pup wolves',  dmg:38,range:3.0,rate:0.75,tier:2};
+HEROES.ECLIPSE.S2 ={name:'Shadow Storm',  emoji:'⚡',cost:120,desc:'Chain execute — spreads to all marked', dmg:52,range:3.4,rate:0.65,tier:2};
+
+// Resonance Bonds (both heroes must be in squad)
+const BONDS=[
+  {id:'iron_age',     heroes:['GRAK','AXIOM'],   color:'#f97316', name:'Iron Age',      desc:'AXIOM Strikers gain armor-pierce vs GRAK-slowed enemies (+40% dmg)'},
+  {id:'event_horizon',heroes:['LYRA','NOVA'],    color:'#06b6d4', name:'Event Horizon', desc:'NOVA Strikers deal 1.5× inside LYRA Gravity Wells'},
+  {id:'cursed_ground',heroes:['ZARA','ECLIPSE'], color:'#a855f7', name:'Cursed Ground', desc:'Poison spreads to adjacent enemies on death (2 stacks)'},
+];
+
+// Ability nodes — auto-granted at milestone levels (bonuses stored in heroLevels[id].bonuses)
+const ABILITY_NODES={
+  AXIOM:[
+    {lvl:5,  name:'Overclocked Barrels', desc:'+20% Striker attack rate',          bonus:{strikerRate:1.20}},
+    {lvl:10, name:'Network Protocol',    desc:'Anchors grant nearby Strikers +25% dmg', bonus:{anchorAura:1.25}},
+    {lvl:15, name:'Plasma Overload',     desc:'Marked enemy multiplier 3→4×',      bonus:{markedMult:4}},
+    {lvl:20, name:'Fortress Grid',       desc:'Structure HP +50%',                 bonus:{structHP:1.50}},
+  ],
+  LYRA:[
+    {lvl:5,  name:'Mana Resonance',  desc:'All structure costs -15%',           bonus:{manaCost:0.85}},
+    {lvl:10, name:'Gravity Amplify', desc:'Gravity Wells slow 70% (was 50%)',   bonus:{slowAmt:0.70}},
+    {lvl:15, name:'Void Torrent',    desc:'AoE radius +30%',                    bonus:{aoeRadius:1.30}},
+    {lvl:20, name:'Ley Lines',       desc:'Conduit range +40%',                 bonus:{conduitRange:1.40}},
+  ],
+  GRAK:[
+    {lvl:5,  name:'Primal Fury',  desc:'Poisoned enemy mult 2→2.5×',           bonus:{poisonMult:2.5}},
+    {lvl:10, name:'Bone Wall',    desc:'Anchor HP +30%',                        bonus:{anchorHP:1.30}},
+    {lvl:15, name:'Venom Storm',  desc:'Poison dmg/sec 8→14',                  bonus:{poisonRate:14}},
+    {lvl:20, name:'Earthquake',   desc:'Striker AoE radius +50%',              bonus:{strikerAoe:1.50}},
+  ],
+  NOVA:[
+    {lvl:5,  name:'Quantum Flux',   desc:'Wormhole pushback 25→38%',           bonus:{wormholeBack:0.38}},
+    {lvl:10, name:'Time Dilation',  desc:'Time Fracture slow 50→68%',          bonus:{timeSlow:0.68}},
+    {lvl:15, name:'Phase Cascade',  desc:'Quantum Bubble chance 20→32%',       bonus:{bubbleChance:0.32}},
+    {lvl:20, name:'Paradox Engine', desc:'Wormhole deals 2× inside fractures', bonus:{paradoxEngine:true}},
+  ],
+  ZARA:[
+    {lvl:5,  name:'Wolf Pack',     desc:'Spirit Wolf attacks 25% faster',      bonus:{wolfRate:1.25}},
+    {lvl:10, name:'Venom Mastery', desc:'Venom stack cap 5→8',                 bonus:{venomCap:8}},
+    {lvl:15, name:'Spirit Bond',   desc:'Spirit Mist armor shred 40→60%',      bonus:{armorShred:0.60}},
+    {lvl:20, name:'Alpha Howl',    desc:'Wolf kills spread 2 venom stacks',    bonus:{alphaHowl:true}},
+  ],
+  ECLIPSE:[
+    {lvl:5,  name:'Shadow Step',    desc:'Execute threshold 25→33% HP',        bonus:{execThresh:0.33}},
+    {lvl:10, name:'Void Embrace',   desc:'Null Zone damage boost 20→35%',      bonus:{nullBoost:1.35}},
+    {lvl:15, name:'Dark Recursion', desc:'Marked enemies take 2× from Strikers',bonus:{markedBoost:2.0}},
+    {lvl:20, name:'Umbral Form',    desc:'Shadow Spikes pierce to all marked in range',bonus:{shadowPierce:true}},
+  ],
+};
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+
+function ePos(prog,laneOff=0){
+  if(prog<0)return null;
+  const i=Math.floor(prog);
+  if(i>=PATH.length-1)return{x:(PATH[PATH.length-1][0]+.5)*CELL,y:(PATH[PATH.length-1][1]+.5)*CELL};
+  const f=prog-i,[c1,r1]=PATH[i],[c2,r2]=PATH[i+1];
+  const px=(c1+(c2-c1)*f+.5)*CELL,py=(r1+(r2-r1)*f+.5)*CELL;
+  if(laneOff){
+    const dx=c2-c1,dy=r2-r1,len=Math.sqrt(dx*dx+dy*dy)||1;
+    return{x:px+(-dy/len)*laneOff,y:py+(dx/len)*laneOff};
+  }
+  return{x:px,y:py};
+}
+
+function rollDrop(diff,elite,boss,fortune){
+  const d=DIFF[diff],fm=1+fortune*.01,em=elite?2.2:1,bm=boss?6:1,base=d.mm*fm*em*bm;
+  const T={easy:[.12,.03,0,0,0,0],normal:[.22,.08,.02,0,0,0],hard:[.38,.16,.07,.018,0,0],
+    chaos:[.55,.27,.14,.06,.01,.003],apocalypse:[.70,.40,.23,.12,.04,.004]}[diff];
+  const r=Math.random(); let cum=0;
+  for(let i=RORD.length-1;i>=0;i--){cum+=(T[i]||0)*base;if(r<cum)return RORD[i];}
+  return null;
+}
+
+function pickItem(rar,heroIds){
+  let pool=ITEMS.filter(i=>i.rar===rar&&(!i.hero||heroIds.includes(i.hero)));
+  if(!pool.length)pool=ITEMS.filter(i=>i.rar===rar);
+  if(!pool.length)pool=ITEMS.filter(i=>i.rar==='Common');
+  return{...pool[Math.floor(Math.random()*pool.length)],uid:Math.random().toString(36).slice(2)};
+}
+
+function compDrops(diff,heroIds,flawless){
+  const d=DIFF[diff]; const drops=[];
+  let rar=d.guar;
+  if(flawless){const i=RORD.indexOf(rar);rar=RORD[Math.min(i+1,RORD.length-1)];}
+  drops.push(pickItem(rar,heroIds));
+  if(diff==='apocalypse')drops.push(pickItem('Epic',heroIds));
+  if(Math.random()<d.br){
+    const bm={easy:'Common',normal:'Common',hard:'Uncommon',chaos:'Rare',apocalypse:'Rare'}[diff];
+    let br=bm;if(diff==='apocalypse'&&Math.random()<.15)br='Epic';
+    drops.push(pickItem(br,heroIds));
+  }
+  return drops;
+}
+
+function makeWave(wnum,diff){
+  const d=DIFF[diff], isBoss=wnum%5===0;
+  const enemies=[];
+  if(isBoss){
+    const t=ET[5];
+    enemies.push({...t,uid:'b'+Date.now(),maxHp:Math.floor(t.bHp*d.hm*(1+wnum*.12)),
+      hp:Math.floor(t.bHp*d.hm*(1+wnum*.12)),speed:t.spd*d.sm,progress:-4,
+      fx:{slow:0,poison:0,marked:false},alive:true,reached:false});
+  }
+  const count=Math.floor((4+wnum*2.5)*d.cm);
+  const eliteAllowed=['hard','chaos','apocalypse'].includes(diff);
+  for(let i=0;i<count;i++){
+    const isEl=eliteAllowed&&wnum>4&&Math.random()<.15;
+    const pool=wnum<3?[0,2]:wnum<5?[0,1,2]:[0,1,2,3];
+    const ti=isEl?4:pool[Math.floor(Math.random()*pool.length)];
+    const t=ET[ti], hm=d.hm*(1+wnum*.1)*(isEl?1.5:1);
+    enemies.push({...t,uid:`e${i}_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+      maxHp:Math.floor(t.bHp*hm),hp:Math.floor(t.bHp*hm),speed:t.spd*d.sm,
+      progress:-(i*1.8+(isBoss?7:0)),fx:{slow:0,poison:0,marked:false},alive:true,reached:false,
+      laneOff:(Math.random()-.5)*CELL*.38});
+  }
+  return enemies;
+}
+
+// ═══════════════════════════════════════════════════════
+// STAT SCALING & ABILITY HELPERS
+// ═══════════════════════════════════════════════════════
+
+function getBonuses(heroId){
+  const lv=G.heroLevels[heroId];
+  const b={};
+  if(!lv)return b;
+  (ABILITY_NODES[heroId]||[]).forEach(n=>{if(lv.level>=n.lvl)Object.assign(b,n.bonus);});
+  return b;
+}
+
+function effDmgMult(heroId,s){
+  const lv=G.heroLevels[heroId];
+  const base=HEROES[heroId].stats.Power;
+  const curr=lv?lv.stats.Power:base;
+  return(curr/base)*(1+(s&&s.upgrades||0)*0.28);
+}
+function effRangeMult(heroId){
+  const lv=G.heroLevels[heroId];
+  if(!lv)return 1;
+  return lv.stats.Range/HEROES[heroId].stats.Range;
+}
+function effRateMult(heroId){
+  const lv=G.heroLevels[heroId];
+  if(!lv)return 1;
+  return lv.stats.Haste/HEROES[heroId].stats.Haste;
+}
+function effConduitRange(heroId){
+  const lv=G.heroLevels[heroId];
+  if(!lv)return 1;
+  const b=getBonuses(heroId);
+  return(lv.stats.Range/HEROES[heroId].stats.Range)*(b.conduitRange||1);
+}
+function effFortune(heroId){
+  const lv=G.heroLevels[heroId];
+  return lv?lv.stats.Fortune:HEROES[heroId].stats.Fortune;
+}
+
+function awardXP(xp){
+  G.selected.forEach(hid=>{
+    const lv=G.heroLevels[hid];
+    lv.xp+=xp;
+    while(lv.xp>=lv.xpNeeded){
+      lv.xp-=lv.xpNeeded;
+      lv.level++;
+      lv.statPoints+=2;
+      lv.xpNeeded=Math.floor(100*Math.pow(1.15,lv.level-1));
+      G.handleLevelUp(hid,lv.level);
+    }
+  });
+}
+
+function activeBonds(){
+  return BONDS.filter(b=>b.heroes.every(h=>G.selected.includes(h)));
+}
+
+function showToast(msg,color='#22d3ee'){
+  const root=document.getElementById('toast-root');
+  if(!root)return;
+  const el=document.createElement('div');
+  el.className='toast-item';
+  el.style.color=color;
+  el.textContent=msg;
+  root.appendChild(el);
+  setTimeout(()=>el.remove(),3000);
+}
+
+// ═══════════════════════════════════════════════════════
+// STATIC MAP CANVAS (pre-rendered dungeon floor)
+// ═══════════════════════════════════════════════════════
+
+function buildMapCanvas(){
+  const off=document.createElement('canvas');
+  off.width=CW;off.height=CH;
+  const ctx=off.getContext('2d');
+  ctx.fillStyle='#020810';ctx.fillRect(0,0,CW,CH);
+
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+    const isP=PSET.has(`${c},${r}`);
+    const x=c*CELL,y=r*CELL;
+    if(isP){
+      const v=(c*7+r*13)%4;
+      ctx.fillStyle=['#0d1f30','#0b1c2c','#0e2135','#0c1e2e'][v];
+      ctx.fillRect(x,y,CELL,CELL);
+      ctx.strokeStyle='#152438';ctx.lineWidth=.5;
+      ctx.strokeRect(x+.5,y+.5,CELL-1,CELL-1);
+      // subtle top-left highlight
+      ctx.fillStyle='rgba(255,255,255,.025)';
+      ctx.fillRect(x,y,CELL,2);ctx.fillRect(x,y,2,CELL);
+    } else {
+      const v=(c*11+r*17)%3;
+      ctx.fillStyle=['#04090f','#050b12','#030810'][v];
+      ctx.fillRect(x,y,CELL,CELL);
+      // bevel
+      ctx.fillStyle='rgba(255,255,255,.02)';
+      ctx.fillRect(x,y,CELL,2);ctx.fillRect(x,y,2,CELL);
+      ctx.fillStyle='rgba(0,0,0,.25)';
+      ctx.fillRect(x,y+CELL-2,CELL,2);ctx.fillRect(x+CELL-2,y,2,CELL);
+      // scatter decorations
+      const seed=(c*31+r*37+c*r)%22;
+      if(seed<3){
+        ctx.fillStyle='#091420';
+        ctx.beginPath();ctx.arc(x+CELL*.5,y+CELL*.5,7,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#0c1b2c';
+        ctx.beginPath();ctx.arc(x+CELL*.35,y+CELL*.6,4,0,Math.PI*2);ctx.fill();
+      } else if(seed<5){
+        ctx.strokeStyle='#162f4a';ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(x+CELL*.5,y+CELL*.2);ctx.lineTo(x+CELL*.65,y+CELL*.75);
+        ctx.lineTo(x+CELL*.35,y+CELL*.75);ctx.closePath();
+        ctx.fillStyle='#0b1d2e';ctx.fill();ctx.stroke();
+      } else if(seed<6){
+        ctx.strokeStyle='#1a1040';ctx.lineWidth=1.5;
+        ctx.beginPath();
+        ctx.moveTo(x+CELL*.3,y+CELL*.2);ctx.lineTo(x+CELL*.5,y+CELL*.55);
+        ctx.lineTo(x+CELL*.72,y+CELL*.8);ctx.stroke();
+      }
+    }
+    const isStart=c===PATH[0][0]&&r===PATH[0][1];
+    const isEnd=c===PATH[PATH.length-1][0]&&r===PATH[PATH.length-1][1];
+    if(isStart){
+      ctx.fillStyle='#22c55e22';ctx.fillRect(x,y,CELL,CELL);
+      ctx.fillStyle='#22c55e';ctx.font='16px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('▶',x+CELL/2,y+CELL/2);
+    }
+    if(isEnd){
+      ctx.fillStyle='#ef444422';ctx.fillRect(x,y,CELL,CELL);
+      ctx.fillStyle='#ef4444';ctx.font='16px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('⚡',x+CELL/2,y+CELL/2);
+    }
+  }
+
+  // Wall edges between path and non-path
+  for(const[c,r]of PATH){
+    [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dc,dr])=>{
+      const nc=c+dc,nr=r+dr;
+      if(nc<0||nc>=COLS||nr<0||nr>=ROWS)return;
+      if(PSET.has(`${nc},${nr}`))return;
+      ctx.strokeStyle='#1e3d5c';ctx.lineWidth=2.5;
+      ctx.beginPath();
+      if(dc===1){ctx.moveTo((c+1)*CELL,r*CELL);ctx.lineTo((c+1)*CELL,(r+1)*CELL);}
+      else if(dc===-1){ctx.moveTo(c*CELL,r*CELL);ctx.lineTo(c*CELL,(r+1)*CELL);}
+      else if(dr===1){ctx.moveTo(c*CELL,(r+1)*CELL);ctx.lineTo((c+1)*CELL,(r+1)*CELL);}
+      else{ctx.moveTo(c*CELL,r*CELL);ctx.lineTo((c+1)*CELL,r*CELL);}
+      ctx.stroke();
+      ctx.strokeStyle='#2a5580';ctx.lineWidth=.6;
+      ctx.beginPath();
+      if(dc===1){ctx.moveTo((c+1)*CELL-1,r*CELL+1);ctx.lineTo((c+1)*CELL-1,(r+1)*CELL-1);}
+      else if(dc===-1){ctx.moveTo(c*CELL+1,r*CELL+1);ctx.lineTo(c*CELL+1,(r+1)*CELL-1);}
+      else if(dr===1){ctx.moveTo(c*CELL+1,(r+1)*CELL-1);ctx.lineTo((c+1)*CELL-1,(r+1)*CELL-1);}
+      else{ctx.moveTo(c*CELL+1,r*CELL+1);ctx.lineTo((c+1)*CELL-1,r*CELL+1);}
+      ctx.stroke();
+    });
+  }
+
+  // Direction arrows
+  for(let i=0;i<PATH.length-1;i++){
+    const[c,r]=PATH[i],[c2,r2]=PATH[i+1];
+    const a=c2>c?'→':c2<c?'←':r2>r?'↓':'↑';
+    ctx.fillStyle='#243c54';ctx.font='11px monospace';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(a,c*CELL+CELL/2,r*CELL+CELL/2);
+  }
+  return off;
+}
+
+// ═══════════════════════════════════════════════════════
+// CANVAS DRAW
+// ═══════════════════════════════════════════════════════
+
+function drawFrame(ctx,gs,hov,selType,selHero,efx){
+  if(!ctx||!gs)return;
+  ctx.clearRect(0,0,CW,CH);
+
+  // 1. Static dungeon map
+  if(G.mapCanvas)ctx.drawImage(G.mapCanvas,0,0);
+  else{ctx.fillStyle='#020810';ctx.fillRect(0,0,CW,CH);}
+
+  // 2. Anchor aura zones
+  gs.structures.forEach(s=>{
+    if(s.type!=='A'||s.hp<=0)return;
+    const h=HEROES[s.heroId];
+    const cx=(s.col+.5)*CELL,cy=(s.row+.5)*CELL;
+    const rm=effRangeMult(s.heroId);
+    const rad=2.8*CELL*rm;
+    const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+    grad.addColorStop(0,h.color+'1a');grad.addColorStop(1,h.color+'00');
+    ctx.fillStyle=grad;ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.fill();
+  });
+
+  // 3. Hover preview
+  if(hov&&selType&&selHero){
+    const hasS=gs.structures.some(s=>s.col===hov.c&&s.row===hov.r);
+    if(!PSET.has(`${hov.c},${hov.r}`)&&!hasS){
+      const h=HEROES[selHero],sd=h[selType];
+      const x=hov.c*CELL,y=hov.r*CELL;
+      ctx.fillStyle=h.color+'22';ctx.fillRect(x,y,CELL,CELL);
+      ctx.strokeStyle=h.color;ctx.lineWidth=1.5;ctx.strokeRect(x+1,y+1,CELL-2,CELL-2);
+      if(selType==='S'||selType==='S2'){
+        const rng=sd.range*CELL*effRangeMult(selHero);
+        ctx.beginPath();ctx.arc(x+CELL/2,y+CELL/2,rng,0,Math.PI*2);
+        ctx.strokeStyle=h.color+'44';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+      }
+      ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.globalAlpha=.6;ctx.fillText(sd.emoji,x+CELL/2,y+CELL/2);ctx.globalAlpha=1;
+    }
+  }
+
+  // 4. Structures
+  gs.structures.forEach(s=>{
+    const h=HEROES[s.heroId],sd=h[s.type];
+    const x=s.col*CELL,y=s.row*CELL,cx=x+CELL/2,cy=y+CELL/2;
+    const tc=s.type==='A'?'#f59e0b':s.type==='C'?'#06b6d4':s.type==='S2'?'#f43f5e':'#ef4444';
+    // Shadow ellipse
+    ctx.fillStyle='rgba(0,0,0,.45)';
+    ctx.beginPath();ctx.ellipse(cx,cy+CELL*.32,CELL*.3,CELL*.09,0,0,Math.PI*2);ctx.fill();
+    // Flash glow
+    if(s._flash>0){ctx.shadowColor=h.color;ctx.shadowBlur=18*s._flash;}
+    // Base plate
+    const pad=4;
+    ctx.fillStyle=h.color+'1c';
+    ctx.strokeStyle=h.color+(s.hp>0?'cc':'44');
+    ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(x+pad,y+pad,CELL-pad*2,CELL-pad*2,3);
+    ctx.fill();ctx.stroke();
+    ctx.shadowBlur=0;
+    // Type corner dot
+    ctx.fillStyle=tc;ctx.beginPath();ctx.arc(x+CELL-7,y+7,3.5,0,Math.PI*2);ctx.fill();
+    // Tier-2 badge
+    if(sd.tier===2){
+      ctx.fillStyle='#f43f5e';ctx.font='bold 7px Orbitron,sans-serif';
+      ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText('T2',x+4,y+4);
+    }
+    // Emoji
+    ctx.font='20px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(sd.emoji,cx,cy-2);
+    // Upgrade pips
+    for(let u=0;u<(s.upgrades||0);u++){
+      ctx.fillStyle='#f59e0b';ctx.shadowColor='#f59e0b';ctx.shadowBlur=4;
+      ctx.beginPath();ctx.arc(x+8+u*8,y+CELL-8,2.5,0,Math.PI*2);ctx.fill();
+    }
+    ctx.shadowBlur=0;
+    // HP bar
+    const hp=s.hp/s.maxHp,bx=x+4,by=y+CELL-5,bw=CELL-8;
+    ctx.fillStyle='#0d1b2e';ctx.fillRect(bx,by,bw,3);
+    ctx.fillStyle=hp>.5?'#22c55e':hp>.25?'#eab308':'#ef4444';
+    ctx.fillRect(bx,by,bw*hp,3);
+  });
+
+  // 5. Enemies (sorted so furthest-along renders on top)
+  const sorted=[...gs.enemies].sort((a,b)=>a.progress-b.progress);
+  sorted.forEach(e=>{
+    if(!e.alive||e.progress<0)return;
+    const pos=ePos(e.progress,e.laneOff||0);if(!pos)return;
+    const r=e.boss?19:e.elite?14:11;
+    // Ground shadow
+    ctx.fillStyle='rgba(0,0,0,.4)';
+    ctx.beginPath();ctx.ellipse(pos.x,pos.y+r*.9,r*.65,r*.18,0,0,Math.PI*2);ctx.fill();
+    // Glow + body
+    const gc=e.boss?'#ff4400':e.elite?'#cc00aa':'#991111';
+    ctx.shadowColor=gc;ctx.shadowBlur=e.boss?24:e.elite?13:7;
+    ctx.fillStyle='#090909';ctx.beginPath();ctx.arc(pos.x,pos.y,r,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;
+    // Emoji
+    ctx.font=`${e.boss?22:e.elite?17:14}px serif`;
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(e.emoji,pos.x,pos.y);
+    // HP bar
+    const hp=e.hp/e.maxHp,bw=r*2.8;
+    ctx.fillStyle='#1a2d45';ctx.fillRect(pos.x-bw/2,pos.y-r-10,bw,5);
+    ctx.fillStyle=hp>.5?'#22c55e':hp>.25?'#eab308':'#ef4444';
+    ctx.fillRect(pos.x-bw/2,pos.y-r-10,bw*hp,5);
+    // Status icons
+    let si=0;
+    const iy=pos.y-r-16;
+    if(e.fx.slow>0){ctx.fillStyle='#93c5fd';ctx.font='9px serif';ctx.fillText('❄',pos.x-r+si*10,iy);si++;}
+    if(e.fx.poison>0){ctx.fillStyle='#86efac';ctx.font='9px serif';ctx.fillText('☠',pos.x-r+si*10,iy);si++;}
+    if(e.fx.marked){ctx.fillStyle='#fca5a5';ctx.font='9px serif';ctx.fillText('◎',pos.x-r+si*10,iy);}
+  });
+
+  // 6. Effects
+  efx.forEach(ef=>{
+    const a=ef.life/ef.maxLife;
+    if(ef.type==='laser'){
+      ctx.strokeStyle=ef.col+Math.floor(a*200).toString(16).padStart(2,'0');
+      ctx.lineWidth=ef.w||1.5;ctx.beginPath();ctx.moveTo(ef.x1,ef.y1);ctx.lineTo(ef.x2,ef.y2);ctx.stroke();
+    } else if(ef.type==='hit'){
+      ctx.beginPath();ctx.arc(ef.x,ef.y,ef.r*(2-a)*11,0,Math.PI*2);
+      ctx.strokeStyle=ef.col+Math.floor(a*170).toString(16).padStart(2,'0');
+      ctx.lineWidth=1.5;ctx.stroke();
+    } else if(ef.type==='death'){
+      ctx.globalAlpha=a;ctx.font=`${18+ef.sz*(1-a)*14}px serif`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('💥',ef.x,ef.y-(1-a)*28);ctx.globalAlpha=1;
+    } else if(ef.type==='dmgnum'){
+      ctx.globalAlpha=Math.min(1,a*2.5);
+      ctx.font=`bold ${ef.big?12:10}px Orbitron,sans-serif`;
+      ctx.fillStyle=ef.col;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(ef.val,ef.x,ef.y-(1-a)*24);
+      ctx.globalAlpha=1;
+    } else if(ef.type==='xpnum'){
+      ctx.globalAlpha=a;ctx.font='8px Orbitron,sans-serif';
+      ctx.fillStyle='#22d3ee';ctx.textAlign='center';
+      ctx.fillText('+'+ef.val+'xp',ef.x,ef.y-(1-a)*18);
+      ctx.globalAlpha=1;
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// GAME TICK
+// ═══════════════════════════════════════════════════════
+
+function gameTick(){
+  const gs=G.gs;
+  if(!gs||gs.phase!=='combat')return;
+  const efxNext=[];
+  let crystal=gs.crystal,gold=gs.gold,kills=gs.kills,flawless=gs.flawless;
+  const wDrops=[...gs.waveDrops];
+  const bonds=activeBonds();
+
+  const enemies=gs.enemies.map(e=>({...e,fx:{...e.fx}}));
+  const structures=gs.structures.map(s=>({...s}));
+
+  structures.forEach(s=>{if(s._flash>0)s._flash=Math.max(0,s._flash-DT*4);});
+
+  // ── Move enemies ──
+  enemies.forEach(e=>{
+    if(!e.alive||e.reached)return;
+    if(e.fx.phased&&Math.random()<.2){e.fx.phased=false;return;}
+    const spd=e.speed*(e.fx.slow>0?.45:1.0)*DT;
+    e.progress+=spd;
+    if(e.fx.poison>0)e.hp-=e.fx.poison*DT;
+    if(e.fx.slow>0)e.fx.slow=Math.max(0,e.fx.slow-DT*.8);
+
+    // Conduit & Anchor zone effects (with stat scaling)
+    structures.forEach(s=>{
+      if(s.hp<=0)return;
+      const h=HEROES[s.heroId];
+      const sx=(s.col+.5)*CELL,sy=(s.row+.5)*CELL;
+      const pos=ePos(e.progress);if(!pos)return;
+      const dist=Math.sqrt((pos.x-sx)**2+(pos.y-sy)**2);
+      const cr=effConduitRange(s.heroId);
+      const b=getBonuses(s.heroId);
+
+      if(s.type==='A'&&dist<2.8*CELL*effRangeMult(s.heroId)){
+        if(['GRAK','NOVA'].includes(h.id))e.fx.slow=Math.max(e.fx.slow,.3);
+        if(h.id==='NOVA'){
+          const bChance=b.bubbleChance||.20;
+          if(Math.random()<bChance*DT*2)e.fx.phased=true;
+        }
+      }
+      if(s.type==='C'&&dist<1.6*CELL*cr){
+        if(['AXIOM','ECLIPSE'].includes(h.id))e.fx.marked=true;
+        if(['LYRA','NOVA'].includes(h.id)){
+          const slowAmt=b.slowAmt||.5;
+          e.fx.slow=Math.max(e.fx.slow,slowAmt);
+        }
+        if(h.id==='GRAK'){
+          const cap=b.venomCap||5;  // ZARA also uses venomCap but Grak is separate
+          const pRate=b.poisonRate||8;
+          e.fx.slow=Math.max(e.fx.slow,.35);
+          e.fx.poison=Math.min(e.fx.poison+pRate*DT, pRate);
+        }
+        if(h.id==='ZARA'){
+          const cap=getBonuses(s.heroId).venomCap||5;
+          e.fx.poison=Math.min(e.fx.poison+5*DT, 5*cap); // 5 dmg/sec per stack, cap stacks
+        }
+      }
+    });
+
+    if(e.progress>=PATH.length-1){
+      e.reached=true;crystal=Math.max(0,crystal-e.dmg);flawless=false;
+    }
+
+    // Kill check (poison/etc)
+    if(e.hp<=0&&e.alive){
+      e.alive=false;gold+=e.gold;kills++;
+      // Cursed Ground bond: spread poison on death
+      if(bonds.find(b=>b.id==='cursed_ground')){
+        const p=ePos(e.progress,e.laneOff||0);
+        if(p)enemies.forEach(oe=>{
+          if(!oe.alive||oe.uid===e.uid)return;
+          const op=ePos(oe.progress,oe.laneOff||0);if(!op)return;
+          if(Math.sqrt((op.x-p.x)**2+(op.y-p.y)**2)<1.8*CELL)oe.fx.poison=Math.max(oe.fx.poison,10);
+        });
+      }
+      const fortune=Math.max(...G.selected.map(effFortune));
+      const dp=rollDrop(G.diff,e.elite,e.boss,fortune);
+      if(dp){wDrops.push(pickItem(dp,G.selected));}
+      const p=ePos(e.progress,e.laneOff||0);
+      if(p){
+        efxNext.push({type:'death',x:p.x,y:p.y,sz:e.boss?2.2:e.elite?1.5:1,maxLife:.9,life:.9});
+        efxNext.push({type:'xpnum',x:p.x,y:p.y-14,val:e.xp,maxLife:1.1,life:1.1});
+      }
+      awardXP(Math.floor(e.xp*(DIFF[G.diff].sm)));
+    }
+  });
+
+  // ── Enemy separation (soft push so they don't perfectly stack) ──
+  for(let i=0;i<enemies.length;i++){
+    if(!enemies[i].alive)continue;
+    for(let j=i+1;j<enemies.length;j++){
+      if(!enemies[j].alive)continue;
+      const gap=Math.abs(enemies[i].progress-enemies[j].progress);
+      if(gap<0.35){
+        const push=(0.35-gap)*0.25;
+        enemies[i].progress-=push*.5;
+        enemies[j].progress+=push*.5;
+      }
+    }
+  }
+
+  // ── Striker attacks (S and S2) ──
+  structures.forEach(s=>{
+    if(s.hp<=0||(s.type!=='S'&&s.type!=='S2'))return;
+    const h=HEROES[s.heroId],sd=h[s.type];
+    const b=getBonuses(s.heroId);
+    const rateMulti=effRateMult(s.heroId)*(b.strikerRate||1);
+    s._timer=(s._timer||0)+DT;
+    if(s._timer<1/(sd.rate*rateMulti))return;
+    s._timer=0;
+
+    const sx=(s.col+.5)*CELL,sy=(s.row+.5)*CELL;
+    const rng=sd.range*CELL*effRangeMult(s.heroId);
+
+    let best=null,bestProg=-Infinity;
+    enemies.forEach(e=>{
+      if(!e.alive||e.reached||e.progress<0)return;
+      const p=ePos(e.progress,e.laneOff||0);if(!p)return;
+      if(Math.sqrt((p.x-sx)**2+(p.y-sy)**2)<rng&&e.progress>bestProg){bestProg=e.progress;best=e;}
+    });
+    if(!best)return;
+
+    let dmg=sd.dmg*effDmgMult(s.heroId,s);
+
+    // ── Per-hero combo logic (with ability node bonuses) ──
+    if(h.id==='AXIOM'){
+      if(best.fx.marked){
+        const mm=b.markedMult||3;
+        dmg*=mm;
+        // Iron Age bond: +40% vs GRAK-slowed
+        if(best.fx.slow>0&&bonds.find(x=>x.id==='iron_age'))dmg*=1.4;
+      }
+    }
+    if(h.id==='ECLIPSE'){
+      const thresh=b.execThresh||.25;
+      if(best.fx.marked&&best.hp/best.maxHp<thresh){dmg=best.hp+1;}
+      else if(best.fx.marked){dmg*=b.markedBoost||1.5;}
+      // Null Zone bonus
+      const hasNull=structures.some(ns=>ns.type==='A'&&ns.heroId==='ECLIPSE'&&ns.hp>0);
+      if(hasNull)dmg*=b.nullBoost||1.2;
+    }
+    if((h.id==='LYRA'||h.id==='NOVA')&&best.fx.slow>0){
+      dmg*=2;
+      // Event Horizon bond: NOVA gets 1.5× inside LYRA wells
+      if(h.id==='NOVA'&&bonds.find(x=>x.id==='event_horizon')){
+        const inWell=structures.some(ns=>ns.type==='C'&&ns.heroId==='LYRA'&&ns.hp>0&&(()=>{
+          const wx=(ns.col+.5)*CELL,wy=(ns.row+.5)*CELL;
+          const bp=ePos(best.progress,best.laneOff||0);
+          return bp&&Math.sqrt((bp.x-wx)**2+(bp.y-wy)**2)<1.6*CELL;
+        })());
+        if(inWell)dmg*=1.5;
+      }
+    }
+    if(h.id==='GRAK'&&best.fx.poison>0)dmg*=b.poisonMult||2;
+    if(h.id==='ZARA'&&best.fx.poison>0)dmg*=1.5;
+
+    // NOVA pushback
+    if(h.id==='NOVA'){
+      const pb=b.wormholeBack||.28;
+      best.progress=Math.max(0,best.progress-PATH.length*pb);
+    }
+
+    // AoE splash (LYRA, GRAK, S2 variants)
+    const isAoe=h.id==='LYRA'||h.id==='GRAK'||s.type==='S2';
+    if(isAoe){
+      const aoeR=(b.aoeRadius||1)*(b.strikerAoe||1)*1.4*CELL;
+      const apos=ePos(best.progress,best.laneOff||0);
+      if(apos)enemies.forEach(oe=>{
+        if(!oe.alive||oe.uid===best.uid)return;
+        const op=ePos(oe.progress,oe.laneOff||0);if(!op)return;
+        if(Math.sqrt((op.x-apos.x)**2+(op.y-apos.y)**2)<aoeR)oe.hp-=dmg*.6;
+      });
+    }
+
+    best.hp-=dmg;
+    s._flash=1;
+    const bpos=ePos(best.progress,best.laneOff||0);
+    if(bpos){
+      efxNext.push({type:'laser',x1:sx,y1:sy,x2:bpos.x,y2:bpos.y,col:h.color,w:1.8,maxLife:.14,life:.14});
+      efxNext.push({type:'hit',x:bpos.x,y:bpos.y,r:7,col:h.color,maxLife:.22,life:.22});
+      efxNext.push({type:'dmgnum',x:bpos.x,y:bpos.y-8,val:Math.floor(dmg),col:h.color,big:dmg>100,maxLife:1.0,life:1.0});
+    }
+
+    if(best.hp<=0&&best.alive){
+      best.alive=false;gold+=best.gold;kills++;
+      if(bonds.find(b=>b.id==='cursed_ground')){
+        enemies.forEach(oe=>{
+          if(!oe.alive||oe.uid===best.uid)return;
+          const op=ePos(oe.progress,oe.laneOff||0);
+          if(bpos&&op&&Math.sqrt((op.x-bpos.x)**2+(op.y-bpos.y)**2)<1.8*CELL)oe.fx.poison=Math.max(oe.fx.poison,10);
+        });
+      }
+      const fortune=Math.max(...G.selected.map(effFortune));
+      const dp=rollDrop(G.diff,best.elite,best.boss,fortune);
+      if(dp)wDrops.push(pickItem(dp,G.selected));
+      if(bpos)efxNext.push({type:'death',x:bpos.x,y:bpos.y,sz:best.boss?2.2:best.elite?1.5:1,maxLife:.9,life:.9});
+      awardXP(Math.floor(best.xp*(DIFF[G.diff].sm)));
+    }
+  });
+
+  G.efx=[...G.efx.map(e=>({...e,life:e.life-DT})).filter(e=>e.life>0),...efxNext];
+
+  const allDone=enemies.every(e=>!e.alive||e.reached);
+  const newPhase=crystal<=0?'gameover':allDone?'wavecomplete':'combat';
+
+  G.gs={...gs,enemies,structures,crystal,gold,kills,flawless,waveDrops:wDrops,phase:newPhase};
+  G.updateHUD();
+  if(newPhase==='wavecomplete'||newPhase==='gameover')G.handlePhaseChange(newPhase);
+}
+
+// ═══════════════════════════════════════════════════════
+// GAME CONTROLLER (G)
+// ═══════════════════════════════════════════════════════
+
+const G={
+  selected:[],
+  diff:'normal',
+  gs:null,
+  efx:[],
+  selType:null,
+  selHero:null,
+  hovCell:null,
+  heroLevels:{},
+  tickInterval:null,
+  rafId:null,
+  mapCanvas:null,
+
+  init(){
+    Object.keys(HEROES).forEach(id=>{
+      G.heroLevels[id]={level:1,xp:0,xpNeeded:100,statPoints:0,activePath:null,
+        stats:{...HEROES[id].stats},spent:{}};
+    });
+    G.load();
+    G.buildStars();
+    G.buildHeroSelect();
+    G.buildDiffList();
+    G.buildMiniMap();
+    G.goto('menu');
+    document.getElementById('load-btn').style.opacity=localStorage.getItem('nexus_save')?'1':'.4';
+  },
+
+  goto(screen){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'));
+    document.getElementById('screen-'+screen).classList.remove('hidden');
+    if(screen==='map')G.updateMapUI();
+    if(screen==='heroes')G.updateHeroCount();
+  },
+
+  buildStars(){
+    const sf=document.getElementById('star-field');
+    for(let i=0;i<50;i++){
+      const s=document.createElement('div');
+      s.className='star';
+      const sz=Math.random()*2.5+.5;
+      s.style.cssText=`width:${sz}px;height:${sz}px;left:${Math.random()*100}%;top:${Math.random()*100}%;opacity:${Math.random()*.6+.1}`;
+      sf.appendChild(s);
+      setInterval(()=>s.style.opacity=Math.random()*.6+.1,1000+Math.random()*3000);
+    }
+  },
+
+  buildHeroSelect(){
+    const grid=document.getElementById('hero-grid');
+    Object.values(HEROES).forEach(h=>{
+      const card=document.createElement('div');
+      card.className='hero-card';
+      card.id='hcard-'+h.id;
+      card.style.color=h.color;
+      card.innerHTML=`
+        <span style="position:absolute;top:8px;right:8px;font-size:15px;display:none" id="chk-${h.id}">✓</span>
+        <div style="font-size:28px;margin-bottom:7px">${h.icon}</div>
+        <div class="ot" style="font-size:13px;font-weight:700;color:${h.color}">${h.name}</div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:6px">${h.title}</div>
+        <div style="font-size:10px;color:#3d5570;margin-bottom:9px;font-style:italic">${h.origin}</div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${h.paths.map((p,i)=>`<span class="path-tag" style="color:${h.pc[i]}">${p}</span>`).join('')}
+        </div>`;
+      card.onclick=()=>G.toggleHero(h.id);
+      card.onmouseenter=()=>G.showHeroDetail(h.id);
+      grid.appendChild(card);
+    });
+  },
+
+  toggleHero(id){
+    const i=G.selected.indexOf(id);
+    if(i>=0)G.selected.splice(i,1);
+    else if(G.selected.length<6)G.selected.push(id);
+    G.updateHeroCards();
+    G.updateHeroCount();
+  },
+
+  updateHeroCards(){
+    Object.keys(HEROES).forEach(id=>{
+      const card=document.getElementById('hcard-'+id);
+      const chk=document.getElementById('chk-'+id);
+      const sel=G.selected.includes(id);
+      card.classList.toggle('sel',sel);
+      card.style.borderColor=sel?HEROES[id].color:'';
+      card.style.boxShadow=sel?`0 0 18px ${HEROES[id].color}33`:'';
+      chk.style.display=sel?'':'none';
+    });
+  },
+
+  updateHeroCount(){
+    document.getElementById('sel-count').textContent=G.selected.length;
+    document.getElementById('heroes-next').disabled=G.selected.length===0;
+  },
+
+  showHeroDetail(id){
+    const h=HEROES[id], det=document.getElementById('hero-detail');
+    det.innerHTML=`
+      <div style="font-size:32px;margin-bottom:10px">${h.icon}</div>
+      <div class="ot" style="font-size:17px;font-weight:700;color:${h.color};margin-bottom:2px">${h.name}</div>
+      <div style="color:#64748b;font-size:11px;margin-bottom:10px">${h.title}</div>
+      <div style="color:#64748b;font-size:11px;margin-bottom:18px;font-style:italic;line-height:1.6">"${h.lore}"</div>
+      <div class="ot-sm" style="margin-bottom:8px">BASE STATS</div>
+      ${Object.entries(h.stats).map(([k,v])=>`
+        <div class="stat-row"><span style="color:#3d5570">${k}</span><span style="color:${STAT_COLORS[k]||'#94a3b8'}">${v}</span></div>
+        <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${v*10}%;background:${STAT_COLORS[k]||'#94a3b8'}"></div></div>
+      `).join('')}
+      <div class="ot-sm" style="margin-top:14px;margin-bottom:8px">STRUCTURES (TRIAD)</div>
+      ${[['A','ANCHOR','#f59e0b'],['C','CONDUIT','#06b6d4'],['S','STRIKER','#ef4444']].map(([t,l,tc])=>{
+        const sd=h[t];
+        return `<div style="margin-bottom:7px;padding:8px;background:#0a1422;border:1px solid ${tc}22;border-radius:3px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+            <span style="font-size:15px">${sd.emoji}</span>
+            <span class="ot" style="font-size:9px;color:${tc}">${l}</span>
+            <span class="ot" style="font-size:9px;color:#22d3ee;margin-left:auto">${sd.cost}M</span>
+          </div>
+          <div class="ot" style="font-size:10px;color:#94a3b8;margin-bottom:2px">${sd.name}</div>
+          <div style="font-size:10px;color:#475569">${sd.desc}</div>
+        </div>`;
+      }).join('')}
+      <div class="ot-sm" style="margin-top:14px;margin-bottom:8px">PLAYSTYLE PATHS</div>
+      ${h.paths.map((p,i)=>`
+        <div style="padding:7px 10px;margin-bottom:5px;border-left:3px solid ${h.pc[i]};background:#060d1a;border-radius:0 3px 3px 0">
+          <div class="ot" style="font-size:10px;color:${h.pc[i]};margin-bottom:2px">${p}</div>
+          <div style="font-size:10px;color:#475569">${h.pathDesc[i]}</div>
+        </div>`).join('')}`;
+  },
+
+  buildDiffList(){
+    const list=document.getElementById('diff-list');
+    Object.entries(DIFF).forEach(([key,d])=>{
+      const card=document.createElement('div');
+      card.className='diff-card';card.id='dcard-'+key;
+      card.innerHTML=`
+        <div class="ot" style="font-size:12px;font-weight:700;color:${d.col}">${d.label}</div>
+        <div style="font-size:10px;color:#3d5570;margin-top:3px">Guaranteed: <span style="color:${RC[d.guar]};font-family:'Orbitron',sans-serif">${d.guar}</span></div>`;
+      card.onclick=()=>{G.diff=key;G.updateDiffCards();G.updateMapUI();};
+      list.appendChild(card);
+    });
+    G.updateDiffCards();
+  },
+
+  updateDiffCards(){
+    Object.keys(DIFF).forEach(k=>{
+      const c=document.getElementById('dcard-'+k);
+      const sel=G.diff===k,d=DIFF[k];
+      c.classList.toggle('sel',sel);
+      c.style.borderColor=sel?d.col:'';
+      c.style.boxShadow=sel?`0 0 14px ${d.col}33`:'';
+    });
+    document.getElementById('deploy-btn').style.color=DIFF[G.diff].col;
+  },
+
+  buildMiniMap(){
+    const wrap=document.getElementById('map-mini');
+    const grid=document.createElement('div');
+    grid.style.cssText=`display:grid;grid-template-columns:repeat(${COLS},16px);grid-template-rows:repeat(${ROWS},16px);gap:1px`;
+    for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){
+      const cell=document.createElement('div');
+      const isP=PSET.has(`${c},${r}`);
+      const isS=c===PATH[0][0]&&r===PATH[0][1];
+      const isE=c===PATH[PATH.length-1][0]&&r===PATH[PATH.length-1][1];
+      cell.style.cssText=`width:16px;height:16px;background:${isS?'#22c55e33':isE?'#ef444433':isP?'#0c1828':'#040a14'};border:1px solid ${isP?'#162540':'#090e18'};border-radius:1px`;
+      grid.appendChild(cell);
+    }
+    wrap.appendChild(grid);
+    wrap.insertAdjacentHTML('beforeend',`<div style="margin-top:7px;font-size:9px;color:#1e3555;display:flex;gap:14px;font-family:'Orbitron',sans-serif">
+      <span style="color:#22c55e33;background:#22c55e22;padding:1px 5px;border-radius:2px">▶ Start</span>
+      <span style="color:#ef444444;background:#ef444422;padding:1px 5px;border-radius:2px">⚡ Crystal</span>
+      <span style="color:#162540">─ Enemy Path</span>
+    </div>`);
+  },
+
+  updateMapUI(){
+    const d=DIFF[G.diff];
+    // Map stats
+    const ms=document.getElementById('map-stats');
+    ms.innerHTML=[
+      {l:'WAVES',v:'10',i:'🌊'},
+      {l:'GUARANTEED DROP',v:d.guar,i:'📦',c:RC[d.guar]},
+      {l:'BONUS ROLL',v:`${Math.round(d.br*100)}%`,i:'🎲'},
+      {l:'STARTING MANA',v:d.mana,i:'💧'},
+    ].map(({l,v,i,c})=>`
+      <div class="info-card">
+        <div class="ot-sm" style="margin-bottom:3px">${i} ${l}</div>
+        <div class="ot" style="font-size:15px;font-weight:700;color:${c||'#e2e8f0'}">${v}</div>
+      </div>`).join('');
+    // Diff details
+    document.getElementById('diff-details').innerHTML=`
+      <span style="color:${d.col};font-family:'Orbitron',sans-serif;font-size:10px">${d.label.toUpperCase()}: </span>
+      Enemy HP ×${d.hm} · Speed ×${d.sm} · Count ×${d.cm}<br>
+      ${d.br>0?`<span style="color:#3d5570">Flawless run: guaranteed drop upgraded one rarity tier</span><br>`:''}
+      <span style="color:#3d5570">Monster drops & completion rewards are separate loot pools</span>`;
+    // Squad preview
+    const sq=document.getElementById('squad-list');
+    sq.innerHTML=G.selected.map(id=>{const h=HEROES[id];return`
+      <div style="padding:8px 10px;margin-bottom:7px;background:${h.color}11;border:1px solid ${h.color}33;border-radius:3px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">${h.icon}</span>
+        <div><div class="ot" style="font-size:10px;color:${h.color}">${h.name}</div><div style="font-size:9px;color:#3d5570">${h.title}</div></div>
+      </div>`;}).join('')+
+      (G.selected.length>1?`<div style="padding:7px;background:#040a14;border:1px solid #0f1e35;border-radius:3px;font-size:10px;color:#3d5570;margin-top:4px">🔗 Resonance Bonds active between heroes</div>`:'');
+  },
+
+  startGame(){
+    const d=DIFF[G.diff];
+    G.gs={
+      phase:'build',wave:1,
+      crystal:1000,maxCrystal:1000,
+      mana:d.mana,gold:50,kills:0,flawless:true,
+      structures:[],enemies:[],waveDrops:[],
+    };
+    G.efx=[];
+    G.selType=null;
+    G.selHero=G.selected[0];
+    G.hovCell=null;
+    document.getElementById('hud-diff').textContent=d.label.toUpperCase();
+    G.goto('game');
+    G.mapCanvas=buildMapCanvas();
+    G.setupCanvas();
+    G.buildGameLeftPanel();
+    G.updateHUD();
+    G.updatePhaseBadge();
+    G.updateBondsHUD();
+    G.startRenderLoop();
+  },
+
+  setupCanvas(){
+    const canvas=document.getElementById('game-canvas');
+    canvas.width=CW;canvas.height=CH;
+    canvas.onclick=G.handleCanvasClick;
+    canvas.onmousemove=G.handleCanvasMove;
+    canvas.onmouseleave=()=>G.hovCell=null;
+    canvas.oncontextmenu=(e)=>{e.preventDefault();G.selType=null;G.renderStructurePanel();};
+  },
+
+  buildGameLeftPanel(){
+    // Hero tabs
+    const tabs=document.getElementById('hero-tabs');
+    tabs.innerHTML=G.selected.map(id=>{
+      const h=HEROES[id];
+      return`<div class="htab${G.selHero===id?' active':''}" id="htab-${id}" style="color:${h.color};border-color:${G.selHero===id?h.color:'#111e30'}" onclick="G.setHero('${id}')">${h.icon} ${h.name}</div>`;
+    }).join('');
+    G.renderStructurePanel();
+    G.updatePlacedList();
+  },
+
+  setHero(id){
+    G.selHero=id;
+    document.querySelectorAll('.htab').forEach(t=>t.classList.remove('active'));
+    const tab=document.getElementById('htab-'+id);
+    if(tab){const h=HEROES[id];tab.classList.add('active');tab.style.borderColor=h.color;}
+    G.selType=null;
+    G.renderStructurePanel();
+  },
+
+  renderStructurePanel(){
+    const panel=document.getElementById('structure-panel');
+    if(!G.selHero){panel.innerHTML='';return;}
+    const h=HEROES[G.selHero],gs=G.gs;
+    const lv=G.heroLevels[G.selHero];
+    const rows=[['A','ANCHOR','#f59e0b'],['C','CONDUIT','#06b6d4'],['S','STRIKER','#ef4444']];
+    if(lv&&lv.level>=15&&h.S2)rows.push(['S2','STRIKER II','#f43f5e']);
+    panel.innerHTML=rows.map(([t,label,tc])=>{
+      const sd=h[t],canAfford=gs&&gs.mana>=sd.cost,isSel=G.selType===t&&gs?.phase==='build';
+      return`<div class="sbtn${isSel?' active':''}${!canAfford||gs?.phase!=='build'?' no-mana':''}"
+        style="color:${tc};border-color:${isSel?tc:'#0f1e35'};background:${isSel?tc+'18':'#060d1a'}"
+        onclick="G.selectType('${t}')">
+        <div class="stype-dot" style="background:${tc}"></div>
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">
+            <span class="ot" style="font-size:9px;color:${tc}">${label}</span>
+            <span class="ot" style="font-size:10px;color:${canAfford?'#22d3ee':'#ef4444'}">${sd.cost}M</span>
+          </div>
+          <div style="font-size:11px;font-weight:600">${sd.emoji} ${sd.name}</div>
+          <div style="font-size:10px;color:#3d5570;line-height:1.4;margin-top:2px">${sd.desc}</div>
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  selectType(t){
+    if(!G.gs||G.gs.phase!=='build')return;
+    const h=HEROES[G.selHero],sd=h[t];
+    if(G.gs.mana<sd.cost)return;
+    G.selType=G.selType===t?null:t;
+    G.renderStructurePanel();
+  },
+
+  updatePlacedList(){
+    const gs=G.gs;
+    document.getElementById('placed-count').textContent=gs?.structures.length||0;
+    const list=document.getElementById('placed-list');
+    const UCOSTS=[30,70,130];
+    list.innerHTML=(gs?.structures||[]).map(s=>{
+      const h=HEROES[s.heroId],sd=h[s.type];
+      const upgs=s.upgrades||0;
+      const canUpg=upgs<3&&gs.phase==='build'&&gs.gold>=(UCOSTS[upgs]||999);
+      const pipHtml=[0,1,2].map(i=>`<span class="upg-pip${i<upgs?' lit':''}" style="color:${h.color}"></span>`).join('');
+      return`<div class="placed-item" style="flex-wrap:wrap;gap:3px">
+        <span>${sd.emoji}</span>
+        <span class="ot" style="font-size:9px;color:${h.color}">${h.name}</span>
+        <span style="color:#3d5570;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${sd.name}</span>
+        <div style="width:100%;display:flex;align-items:center;gap:4px;padding-left:4px">
+          <span style="font-size:9px;color:#1e3555">${pipHtml}</span>
+          ${gs.phase==='build'&&upgs<3?`<button class="upg-btn"${canUpg?'':' disabled'} onclick="G.upgradeStructure('${s.uid}')" title="Upgrade: ${UCOSTS[upgs]}g">${UCOSTS[upgs]}g ↑</button>`:''}
+          <span class="sell-x" style="margin-left:auto" title="Sell ${Math.floor(sd.cost*.5)}M" onclick="G.sellStructure('${s.uid}')">✕</span>
+        </div>
+      </div>`;
+    }).join('');
+  },
+
+  sellStructure(uid){
+    if(!G.gs||G.gs.phase!=='build')return;
+    const s=G.gs.structures.find(x=>x.uid===uid);if(!s)return;
+    const sd=HEROES[s.heroId][s.type];
+    G.gs.structures=G.gs.structures.filter(x=>x.uid!==uid);
+    G.gs.mana+=Math.floor(sd.cost*.5);
+    G.updateHUD();G.updatePlacedList();
+  },
+
+  handleCanvasClick(e){
+    const gs=G.gs;if(!gs||gs.phase!=='build'||!G.selType||!G.selHero)return;
+    const canvas=document.getElementById('game-canvas');
+    const rect=canvas.getBoundingClientRect();
+    const scX=CW/rect.width,scY=CH/rect.height;
+    const col=Math.floor((e.clientX-rect.left)*scX/CELL);
+    const row=Math.floor((e.clientY-rect.top)*scY/CELL);
+    if(col<0||col>=COLS||row<0||row>=ROWS)return;
+    if(PSET.has(`${col},${row}`))return;
+    if(gs.structures.find(s=>s.col===col&&s.row===row))return;
+    const h=HEROES[G.selHero],sd=h[G.selType];
+    if(gs.mana<sd.cost)return;
+    gs.structures.push({uid:Math.random().toString(36).slice(2),heroId:G.selHero,type:G.selType,
+      col,row,hp:SHP[G.selType],maxHp:SHP[G.selType],_timer:0,_flash:0,upgrades:0});
+    gs.mana-=sd.cost;
+    G.updateHUD();G.updatePlacedList();G.renderStructurePanel();
+  },
+
+  handleCanvasMove(e){
+    const canvas=document.getElementById('game-canvas');
+    const rect=canvas.getBoundingClientRect();
+    const scX=CW/rect.width,scY=CH/rect.height;
+    const c=Math.floor((e.clientX-rect.left)*scX/CELL);
+    const r=Math.floor((e.clientY-rect.top)*scY/CELL);
+    G.hovCell=(c>=0&&c<COLS&&r>=0&&r<ROWS)?{c,r}:null;
+  },
+
+  startCombat(){
+    if(!G.gs||G.gs.phase!=='build')return;
+    G.gs.enemies=makeWave(G.gs.wave,G.diff);
+    G.gs.waveDrops=[];
+    G.gs.phase='combat';
+    G.updatePhaseBadge();
+    document.getElementById('start-wave-btn').classList.add('hidden');
+    document.getElementById('combat-msg').classList.remove('hidden');
+    G.tickInterval=setInterval(gameTick,Math.round(DT*1000));
+  },
+
+  updateHUD(){
+    const gs=G.gs;if(!gs)return;
+    const pct=gs.crystal/gs.maxCrystal;
+    document.getElementById('crystal-txt').textContent=`${Math.max(0,Math.floor(gs.crystal))}/${gs.maxCrystal}`;
+    document.getElementById('crystal-fill').style.width=`${Math.max(0,pct)*100}%`;
+    document.getElementById('crystal-fill').style.background=pct>.5?'#22c55e':pct>.25?'#eab308':'#ef4444';
+    document.getElementById('crystal-txt').style.color=pct>.5?'#22c55e':pct>.25?'#eab308':'#ef4444';
+    document.getElementById('hud-mana').textContent=Math.floor(gs.mana);
+    document.getElementById('hud-gold').textContent=Math.floor(gs.gold);
+    document.getElementById('hud-kills').textContent=gs.kills;
+    document.getElementById('hud-wave').textContent=`${gs.wave}/10`;
+  },
+
+  updatePhaseBadge(){
+    const badge=document.getElementById('phase-badge');
+    const phase=G.gs?.phase||'build';
+    const map={build:{t:'BUILD PHASE',c:'#22c55e'},combat:{t:'⚔ COMBAT',c:'#ef4444'},wavecomplete:{t:'WAVE DONE',c:'#f59e0b'}};
+    const m=map[phase]||{t:phase.toUpperCase(),c:'#94a3b8'};
+    badge.textContent=m.t;badge.style.color=m.c;badge.style.borderColor=m.c;
+    badge.style.animation=phase==='combat'?'blink 1s step-end infinite':'none';
+  },
+
+  handlePhaseChange(phase){
+    clearInterval(G.tickInterval);G.tickInterval=null;
+    if(phase==='gameover'){setTimeout(()=>G.goto('gameover'),600);return;}
+    if(phase==='wavecomplete'){
+      document.getElementById('combat-msg').classList.add('hidden');
+      G.updatePhaseBadge();
+      G.showDropsModal();
+    }
+  },
+
+  showDropsModal(){
+    const gs=G.gs;
+    const drops=gs.waveDrops||[];
+    document.getElementById('drop-wave-label').textContent=`WAVE ${gs.wave} COMPLETE`;
+    document.getElementById('drop-title').textContent=drops.length>0?'ITEMS DROPPED ':'NO DROPS THIS WAVE';
+    const container=document.getElementById('drop-items');
+    container.innerHTML='';
+    drops.forEach((item,i)=>{
+      const card=document.createElement('div');
+      card.className='item-card';
+      card.style.borderColor=RC[item.rar];
+      card.style.boxShadow=RG[item.rar];
+      card.innerHTML=`
+        <div class="ot" style="font-size:9px;color:${RC[item.rar]};letter-spacing:2px;margin-bottom:5px">${item.rar.toUpperCase()}</div>
+        <div class="ot" style="font-size:11px;color:#e2e8f0;margin-bottom:3px;line-height:1.3">${item.name}</div>
+        <div style="font-size:9px;color:#3d5570;margin-bottom:5px">${item.slot}</div>
+        <div style="font-size:10px;color:#64748b;line-height:1.4">${item.desc}</div>
+        ${item.hero?`<div class="ot" style="font-size:8px;color:${HEROES[item.hero]?.color||'#475569'};margin-top:5px">${item.hero} ONLY</div>`:''}`;
+      container.appendChild(card);
+      setTimeout(()=>card.classList.add('show'),i*350+100);
+    });
+    document.getElementById('modal-backdrop').classList.remove('hidden');
+    document.getElementById('drop-continue-btn').onclick=G.continueAfterWave;
+  },
+
+  continueAfterWave(){
+    document.getElementById('modal-backdrop').classList.add('hidden');
+    const gs=G.gs;
+    if(gs.wave>=10){
+      // Map complete
+      const completionDrops=compDrops(G.diff,G.selected,gs.flawless);
+      G.showCompleteScreen(completionDrops);
+      return;
+    }
+    const d=DIFF[G.diff];
+    G.gs={...gs,phase:'build',wave:gs.wave+1,mana:gs.mana+d.mw,enemies:[],waveDrops:[]};
+    G.updateHUD();G.updatePhaseBadge();G.updatePlacedList();G.renderStructurePanel();G.updateBondsHUD();
+    document.getElementById('start-wave-btn').classList.remove('hidden');
+  },
+
+  showCompleteScreen(drops){
+    G.stopRenderLoop();
+    const container=document.getElementById('complete-drops');
+    container.innerHTML=drops.map(item=>`
+      <div style="padding:13px 10px;border-radius:4px;width:145px;border:1px solid ${RC[item.rar]};box-shadow:${RG[item.rar]};background:#070e1b">
+        <div class="ot" style="font-size:9px;color:${RC[item.rar]};letter-spacing:2px;margin-bottom:5px">${item.rar.toUpperCase()}</div>
+        <div class="ot" style="font-size:11px;color:#e2e8f0;margin-bottom:3px;line-height:1.3">${item.name}</div>
+        <div style="font-size:10px;color:#64748b;line-height:1.4">${item.desc}</div>
+        ${item.hero?`<div class="ot" style="font-size:8px;color:${HEROES[item.hero]?.color||'#475569'};margin-top:5px">${item.hero} ONLY</div>`:''}
+      </div>`).join('');
+    G.goto('complete');
+  },
+
+  startRenderLoop(){
+    G.stopRenderLoop();
+    const canvas=document.getElementById('game-canvas');
+    const ctx=canvas.getContext('2d');
+    const loop=()=>{
+      drawFrame(ctx,G.gs,G.hovCell,G.selType,G.selHero,G.efx);
+      G.rafId=requestAnimationFrame(loop);
+    };
+    G.rafId=requestAnimationFrame(loop);
+  },
+
+  stopRenderLoop(){
+    if(G.rafId){cancelAnimationFrame(G.rafId);G.rafId=null;}
+    if(G.tickInterval){clearInterval(G.tickInterval);G.tickInterval=null;}
+  },
+
+  openNodeTree(heroId){
+    const h=HEROES[heroId],lv=G.heroLevels[heroId];
+    document.getElementById('nt-hero-name').textContent=`${h.icon} ${h.name} — NODE TREE`;
+    document.getElementById('nt-hero-name').style.color=h.color;
+    document.getElementById('nt-points').textContent=lv.statPoints;
+    // Stats
+    const sg=document.getElementById('nt-stats-grid');
+    sg.innerHTML=Object.entries(lv.stats).map(([k,v])=>`
+      <div style="background:#060d1a;border:1px solid #0f1e35;border-radius:3px;padding:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+          <span class="ot" style="font-size:9px;color:${STAT_COLORS[k]||'#94a3b8'}">${k}</span>
+          <div style="display:flex;align-items:center;gap:5px">
+            <span class="ot" style="font-size:12px;color:${STAT_COLORS[k]||'#94a3b8'}">${v}</span>
+            ${lv.statPoints>0?`<button class="btn" style="color:${STAT_COLORS[k]};padding:1px 5px;font-size:9px" onclick="G.spendStat('${heroId}','${k}')">+</button>`:''}
+          </div>
+        </div>
+        <div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(v*8,100)}%;background:${STAT_COLORS[k]||'#94a3b8'}"></div></div>
+      </div>`).join('');
+    // Paths
+    const pp=document.getElementById('nt-paths');
+    pp.innerHTML=h.paths.map((p,i)=>`
+      <div class="node-path${lv.activePath===i?' active-path':''}" style="color:${h.pc[i]};border-color:${lv.activePath===i?h.pc[i]:'#0f1e35'};background:${lv.activePath===i?h.pc[i]+'11':'#060d1a'}" onclick="G.selectPath('${heroId}',${i})">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <div class="ot" style="font-size:11px;font-weight:700">${p}</div>
+          ${lv.activePath===i?'<span style="font-size:9px;padding:1px 6px;background:'+h.pc[i]+'33;border-radius:2px">ACTIVE</span>':''}
+        </div>
+        <div style="font-size:11px;color:#64748b">${h.pathDesc[i]}</div>
+      </div>`).join('');
+    // Mastery
+    // Ability nodes
+    const nodes=ABILITY_NODES[heroId]||[];
+    const abilityHtml=nodes.map(n=>{
+      const unlocked=lv.level>=n.lvl;
+      return`<div style="padding:6px 8px;margin-bottom:4px;border-radius:3px;border:1px solid ${unlocked?h.color+'55':'#0f1e35'};background:${unlocked?h.color+'0d':'#040912'};opacity:${unlocked?1:.45}">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span class="ot" style="font-size:9px;color:${unlocked?h.color:'#334155'}">${n.name}</span>
+          <span style="font-size:9px;color:#334155">Lv.${n.lvl}</span>
+        </div>
+        <div style="font-size:10px;color:#475569;margin-top:2px">${n.desc}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('nt-mastery').innerHTML=`
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="color:#3d5570">Level</span><span class="ot" style="color:${h.color}">${lv.level}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+        <span style="color:#3d5570">XP</span><span style="color:#94a3b8">${lv.xp} / ${lv.xpNeeded}</span>
+      </div>
+      <div class="stat-bar-bg" style="margin-bottom:12px"><div class="stat-bar-fill" style="width:${Math.min((lv.xp/lv.xpNeeded)*100,100)}%;background:${h.color}"></div></div>
+      <div class="ot-sm" style="margin-bottom:8px">ABILITY NODES</div>
+      ${abilityHtml}`;
+    document.getElementById('node-tree-modal').classList.remove('hidden');
+  },
+
+  closeNodeTree(){document.getElementById('node-tree-modal').classList.add('hidden');},
+
+  spendStat(heroId,stat){
+    const lv=G.heroLevels[heroId];
+    if(lv.statPoints<=0)return;
+    lv.statPoints--;lv.stats[stat]=(lv.stats[stat]||0)+1;
+    G.openNodeTree(heroId);
+  },
+
+  selectPath(heroId,idx){
+    G.heroLevels[heroId].activePath=idx;
+    G.openNodeTree(heroId);
+  },
+
+  upgradeStructure(uid){
+    const gs=G.gs;if(!gs||gs.phase!=='build')return;
+    const s=gs.structures.find(x=>x.uid===uid);if(!s)return;
+    const UCOSTS=[30,70,130];
+    const upgs=s.upgrades||0;if(upgs>=3)return;
+    const cost=UCOSTS[upgs];if(gs.gold<cost)return;
+    s.upgrades=(upgs+1);
+    s.maxHp=Math.floor(s.maxHp*1.2);
+    s.hp=Math.floor(s.hp*1.2);
+    gs.gold-=cost;
+    G.updateHUD();G.updatePlacedList();
+  },
+
+  handleLevelUp(heroId,level){
+    const h=HEROES[heroId];
+    showToast(`${h.icon} ${h.name} LVL ${level}!`,h.color);
+    if(level===15)showToast(`${h.icon} TIER 2 UNLOCKED`,h.color);
+    // Auto-grant ability nodes
+    const nodes=ABILITY_NODES[heroId]||[];
+    nodes.filter(n=>n.lvl===level).forEach(n=>{
+      showToast(`✦ ${n.name}`,h.color);
+    });
+    G.renderStructurePanel();
+    // Update hero tab to show level
+    const tab=document.getElementById('htab-'+heroId);
+    if(tab)tab.title=`Lv.${level}`;
+  },
+
+  updateBondsHUD(){
+    const el=document.getElementById('hud-bonds');if(!el)return;
+    const active=activeBonds();
+    el.innerHTML=active.map(b=>`<div class="bond-chip" style="color:${b.color}" title="${b.desc}">${b.name}</div>`).join('');
+  },
+
+  save(){
+    const data={heroLevels:G.heroLevels,diff:G.diff,selected:G.selected,v:1};
+    localStorage.setItem('nexus_save',JSON.stringify(data));
+    showToast('💾 GAME SAVED','#f59e0b');
+    document.getElementById('load-btn').style.opacity='1';
+  },
+
+  load(){
+    try{
+      const raw=localStorage.getItem('nexus_save');if(!raw)return;
+      const data=JSON.parse(raw);
+      if(data.heroLevels){
+        Object.keys(data.heroLevels).forEach(id=>{
+          if(G.heroLevels[id])Object.assign(G.heroLevels[id],data.heroLevels[id]);
+        });
+      }
+      if(data.diff)G.diff=data.diff;
+      if(data.selected&&data.selected.length)G.selected=data.selected;
+      showToast('📂 SAVE LOADED','#60a5fa');
+    }catch(e){console.warn('Load failed',e);}
+  },
+};
+
+// Start
+window.onload=()=>G.init();
+</script>
+</body>
+</html>
