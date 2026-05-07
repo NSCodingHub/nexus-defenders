@@ -4,7 +4,7 @@
 Single-player/multi-hero tower defense RPG. Sci-fi setting (Year 2387). A dimensional rift called "The Breach" merges prehistoric, present, and future timelines. Players defend the Nexus Core crystal against waves of enemies using a squad of heroes, each with a unique Triad structure system (Anchor / Conduit / Striker).
 
 ## Tech Stack
-- **Current:** Phaser 3 (migrating from vanilla HTML5 Canvas)
+- **Current:** Phaser 3 (migration from vanilla HTML5 Canvas complete)
 - **Language:** JavaScript (ES2020+)
 - **Renderer:** Phaser 3 WebGL/Canvas
 - **Target:** Browser (desktop-first)
@@ -113,11 +113,15 @@ Cross-hero passive bonuses when both heroes are in the squad:
 Common (grey) → Uncommon (green) → Rare (blue) → Epic (purple) → Legendary (orange) → Mythic (red)
 
 ## Known Pending Features
-- [ ] Phaser 3 migration (in progress)
-- [ ] Free-form tower placement + pathfinding
-- [ ] Pause / ESC menu
-- [ ] Tavern screen (shop / inventory / upgrades)
-- [ ] First-run lore cinematic
+- [x] Phaser 3 migration
+- [x] Free-form tower placement
+- [x] Pause / ESC menu
+- [x] Tavern screen (inventory + equip tabs; shop stubbed)
+- [x] First-run lore cinematic
+- [ ] Tavern shop tab (gold-based purchases)
+- [ ] Stat allocation UI (spend level-up stat points)
+- [ ] Radial tower context menu (sell / upgrade / info)
+- [ ] Tower placement x-bound guard (block placement in sidebar area)
 - [ ] Mastery Shards + solo milestone challenges
 - [ ] Apex Form (level 30)
 - [ ] Prestige system
