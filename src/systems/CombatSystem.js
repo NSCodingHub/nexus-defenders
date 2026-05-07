@@ -30,8 +30,8 @@ export function activeBonds(squadIds) {
 // ─── damage number pool (returned for the scene to render) ───────────────────
 
 export function processTick(state, delta) {
-  const { towers, enemies, squad, heroStats, abilityNodes, diff, bonds } = state;
-  const results = { killed: [], dmgNums: [], crystalHit: 0 };
+  const { towers, enemies, squad, heroStats, abilityNodes, diff, bonds, hero } = state;
+  const results = { killed: [], dmgNums: [], crystalHit: 0, heroDmgTaken: 0 };
 
   // Tick upgrade timers (also handled in GameScene update — CombatSystem skips to avoid double-tick)
 
@@ -39,11 +39,13 @@ export function processTick(state, delta) {
   // Enemy movement + crystal hit
   enemies.forEach(enemy => {
     if (enemy.dead) return;
-    moveEnemy(enemy, delta, diff);
+    const mvResult = moveEnemy(enemy, delta, diff, hero);
+    results.heroDmgTaken += mvResult.heroDmgTaken;
 
     if (enemy.atCrystal) {
-      results.crystalHit += enemy.def.dmg;
+      results.crystalHit += enemy.def ? enemy.def.dmg : (enemy.dmg || 10);
       enemy.dead = true;
+      enemy.escaped = true;
     }
   });
 
@@ -200,45 +202,81 @@ function applyConduitEffect(heroId, enemy, delta, bonuses) {
   }
 }
 
-function moveEnemy(enemy, delta, diff) {
+function moveEnemy(enemy, delta, diff, hero) {
   const dt = delta / 1000;
+  let heroDmgTaken = 0;
+
+  // Freeze (from Time Stop ability)
+  if (enemy.freezeTimer > 0) {
+    enemy.freezeTimer -= delta;
+    if (enemy.freezeTimer < 0) enemy.freezeTimer = 0;
+    return { heroDmgTaken };
+  }
+
+  // Hero aggro
+  if (hero && !hero.dead) {
+    const hdx = hero.x - enemy.x, hdy = hero.y - enemy.y;
+    const hdist = Math.sqrt(hdx * hdx + hdy * hdy);
+    const aggroR = enemy.aggroRange || 150;
+
+    if (hdist <= aggroR) {
+      enemy.aggroTarget = 'hero';
+    } else if (enemy.aggroTarget === 'hero' && hdist > aggroR * 2.0) {
+      enemy.aggroTarget = null;
+    }
+
+    if (enemy.aggroTarget === 'hero') {
+      if (enemy.slowed)     enemy.slowed = false;
+      if (enemy.inFracture) enemy.inFracture = false;
+
+      let speed = enemy.spd * diff.sm;
+      if (enemy.slowFactor !== undefined) speed *= enemy.slowFactor;
+
+      const atkR = enemy.attackRange || 35;
+      if (hdist <= atkR) {
+        enemy._atkCd = (enemy._atkCd || 0) - delta;
+        if (enemy._atkCd <= 0) {
+          enemy._atkCd = 1000 / (enemy.attackRate || 1);
+          if (!hero.invincible) heroDmgTaken += enemy.meleeDmgVsHero || 5;
+        }
+      } else {
+        const nx = hdx / hdist, ny = hdy / hdist;
+        enemy.x += nx * speed * dt;
+        enemy.y += ny * speed * dt;
+      }
+      return { heroDmgTaken };
+    }
+  }
+
+  // Normal waypoint following
   const wps = enemy.waypoints;
   if (!wps || enemy.waypointIndex >= wps.length) {
     enemy.atCrystal = true;
-    return;
+    return { heroDmgTaken };
   }
 
   const target = wps[enemy.waypointIndex];
-  const dx = target.x + (enemy.laneOff || 0) * Math.sign(target.y - (wps[enemy.waypointIndex - 1]?.y ?? target.y) || 1) - enemy.x;
-  const dy = target.y - (enemy.laneOff || 0) * Math.sign(target.x - (wps[enemy.waypointIndex - 1]?.x ?? target.x) || 1) - enemy.y;
-
-  // Simpler: just go to waypoint directly; laneOff is applied at spawn
-  const tx = target.x;
-  const ty = target.y;
-  const ex = tx - enemy.x;
-  const ey = ty - enemy.y;
+  const ex = target.x - enemy.x, ey = target.y - enemy.y;
   const dist = Math.sqrt(ex * ex + ey * ey);
 
   let speed = enemy.spd * diff.sm;
-  if (enemy.slowFactor) speed *= (1 - enemy.slowFactor + 1); // slowFactor=0.5 means half speed
-  // Correct: slowFactor is the reduced speed fraction directly
   if (enemy.slowFactor !== undefined) speed = enemy.spd * diff.sm * enemy.slowFactor;
 
   if (dist < 14) {
     enemy.waypointIndex++;
     if (enemy.waypointIndex >= wps.length) enemy.atCrystal = true;
-    return;
+    return { heroDmgTaken };
   }
 
-  const nx = ex / dist;
-  const ny = ey / dist;
+  const nx = ex / dist, ny = ey / dist;
   enemy.x += nx * speed * dt;
   enemy.y += ny * speed * dt;
   enemy.pathProgress = enemy.waypointIndex / wps.length + (1 - dist / 500) / wps.length;
 
-  // Decay temporary debuffs each frame
-  if (enemy.slowed)     enemy.slowed = false;       // re-applied by conduit zone if still in range
+  if (enemy.slowed)     enemy.slowed = false;
   if (enemy.inFracture) enemy.inFracture = false;
+
+  return { heroDmgTaken };
 }
 
 function separateEnemies(enemies) {

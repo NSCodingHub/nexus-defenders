@@ -124,6 +124,80 @@ export const BONDS = [
   { id:'cursed_ground', heroes:['ZARA','ECLIPSE'], color:'#a855f7', name:'Cursed Ground', desc:'Poison spreads to adjacent enemies on death' },
 ];
 
+// ─── hero direct combat stats (DD-style player control) ─────────────────────
+
+HEROES.AXIOM.heroCombat = {
+  maxHP:120, maxMana:100, manaRegen:8, moveSpeed:185,
+  attackType:'ranged', attackDmg:22, attackRange:220, attackRate:2.2,
+  projectileSpeed:450, attackColor:'#22d3ee',
+};
+HEROES.AXIOM.heroAbilities = [
+  { name:'Shield Pulse',    key:'Q', desc:'Knockback nearby enemies + brief invincibility',  cooldown:8,  manaCost:0,  effect:'knockback_aoe',  radius:120, dmg:10,  atCursor:false },
+  { name:'Targeting Lock',  key:'E', desc:'3× attack damage for 4s',                          cooldown:12, manaCost:25, effect:'buff_dmg',        buffMult:3, buffDuration:4, atCursor:false },
+  { name:'Overclock',       key:'R', desc:'Double attack rate for 4s',                        cooldown:15, manaCost:40, effect:'buff_rate',       buffMult:2, buffDuration:4, atCursor:false },
+  { name:'Ion Burst',       key:'F', desc:'Massive AoE explosion at cursor (120 dmg)',        cooldown:20, manaCost:60, effect:'aoe_dmg',         radius:150, dmg:120, atCursor:true },
+];
+
+HEROES.LYRA.heroCombat = {
+  maxHP:80, maxMana:140, manaRegen:12, moveSpeed:165,
+  attackType:'ranged', attackDmg:16, attackRange:230, attackRate:1.0,
+  projectileSpeed:320, attackColor:'#a855f7',
+};
+HEROES.LYRA.heroAbilities = [
+  { name:'Blink',           key:'Q', desc:'Teleport to cursor position',                      cooldown:8,  manaCost:20, effect:'dash',            dashDist:250, atCursor:true },
+  { name:'Gravity Pull',    key:'E', desc:'Pull all enemies toward you',                       cooldown:10, manaCost:35, effect:'pull_aoe',        radius:280, pullForce:300, atCursor:false },
+  { name:'Arcane Nova',     key:'R', desc:'AoE burst around hero (80 dmg)',                   cooldown:12, manaCost:50, effect:'aoe_dmg',         radius:180, dmg:80,  atCursor:false },
+  { name:'Void Collapse',   key:'F', desc:'Massive pull + dmg at cursor (150 dmg)',           cooldown:25, manaCost:90, effect:'aoe_dmg',         radius:200, dmg:150, atCursor:true },
+];
+
+HEROES.GRAK.heroCombat = {
+  maxHP:220, maxMana:60, manaRegen:5, moveSpeed:195,
+  attackType:'melee', attackDmg:42, attackRange:70, attackRate:1.2,
+  attackColor:'#f97316',
+};
+HEROES.GRAK.heroAbilities = [
+  { name:'Ground Slam',     key:'Q', desc:'AoE knockback + 60 dmg around hero',              cooldown:6,  manaCost:10, effect:'knockback_aoe',  radius:130, dmg:60,  atCursor:false },
+  { name:'Battle Cry',      key:'E', desc:'+50% damage for 5s',                               cooldown:12, manaCost:20, effect:'buff_dmg',        buffMult:1.5, buffDuration:5, atCursor:false },
+  { name:'Venom Smash',     key:'R', desc:'Melee AoE + poison (80 dmg)',                      cooldown:10, manaCost:25, effect:'aoe_dmg_poison',  radius:90,  dmg:80,  atCursor:false },
+  { name:'Earthquake',      key:'F', desc:'Massive AoE slow + 100 dmg',                       cooldown:20, manaCost:40, effect:'aoe_dmg_slow',    radius:220, dmg:100, atCursor:false },
+];
+
+HEROES.NOVA.heroCombat = {
+  maxHP:95, maxMana:120, manaRegen:10, moveSpeed:175,
+  attackType:'ranged', attackDmg:20, attackRange:260, attackRate:1.5,
+  projectileSpeed:400, attackColor:'#a3e635',
+};
+HEROES.NOVA.heroAbilities = [
+  { name:'Phase Shift',     key:'Q', desc:'Invincible dash + speed boost',                    cooldown:8,  manaCost:25, effect:'speed_boost',     speedMult:2.2, speedDuration:2, dashDist:180, atCursor:true },
+  { name:'Time Stop',       key:'E', desc:'Freeze all enemies for 2s',                        cooldown:15, manaCost:50, effect:'slow_aoe',         radius:400, slowFactor:0, freezeDur:2000, atCursor:false },
+  { name:'Wormhole Toss',   key:'R', desc:'Pushback nearest enemy 40% on path + 40 dmg',     cooldown:10, manaCost:35, effect:'wormhole',          radius:180, dmg:40, pushback:0.4, atCursor:true },
+  { name:'Quantum Nova',    key:'F', desc:'Massive knockback + 120 dmg all enemies',          cooldown:25, manaCost:80, effect:'knockback_aoe',   radius:350, dmg:120, atCursor:false },
+];
+
+HEROES.ZARA.heroCombat = {
+  maxHP:110, maxMana:130, manaRegen:11, moveSpeed:172,
+  attackType:'ranged', attackDmg:15, attackRange:210, attackRate:1.8,
+  projectileSpeed:350, attackColor:'#34d399',
+};
+HEROES.ZARA.heroAbilities = [
+  { name:'Venom Dart',      key:'Q', desc:'Poison projectile (40 dmg + venom stacks)',       cooldown:4,  manaCost:15, effect:'projectile_poison', dmg:40, venomStacks:4, atCursor:true },
+  { name:'Wolf Call',       key:'E', desc:'Summon wolf companion for 8s',                     cooldown:15, manaCost:40, effect:'summon_wolf',      duration:8000, atCursor:false },
+  { name:'Spirit Heal',     key:'R', desc:'Heal 40% max HP',                                  cooldown:12, manaCost:45, effect:'heal',             healPct:0.4, atCursor:false },
+  { name:'Serpent Storm',   key:'F', desc:'Poison AoE + venom stacks on all in range',       cooldown:20, manaCost:70, effect:'aoe_poison',       radius:280, dmg:50, atCursor:false },
+];
+
+HEROES.ECLIPSE.heroCombat = {
+  maxHP:90, maxMana:110, manaRegen:9, moveSpeed:225,
+  attackType:'melee', attackDmg:28, attackRange:65, attackRate:2.8,
+  attackColor:'#f43f5e',
+};
+HEROES.ECLIPSE.heroAbilities = [
+  { name:'Shadow Step',     key:'Q', desc:'Dash in facing direction',                         cooldown:5,  manaCost:15, effect:'dash',             dashDist:180, atCursor:false },
+  { name:'Mark All',        key:'E', desc:'Mark all enemies in range',                        cooldown:8,  manaCost:30, effect:'mark_aoe',         radius:220, atCursor:false },
+  { name:'Execute',         key:'R', desc:'3× dmg; instant kill marked below 40% HP',        cooldown:6,  manaCost:25, effect:'execute',          radius:70,  dmg:80, execThresh:0.4, atCursor:false },
+  { name:'Shadow Storm',    key:'F', desc:'Chain dmg bouncing between marked enemies',        cooldown:20, manaCost:75, effect:'chain_dmg',        dmg:80, bounces:8, atCursor:false },
+];
+
 export const STAT_COLORS = {
   Power:'#ef4444', Resilience:'#3b82f6', Mana:'#60a5fa',
   Range:'#a855f7', Haste:'#f59e0b',     Fortune:'#34d399',
